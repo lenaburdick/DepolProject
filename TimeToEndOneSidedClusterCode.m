@@ -1,7 +1,7 @@
 clear all
 close all
 
-LengthsofFilament=[5:5:200]
+LengthsofFilament=[5:5:25]
 AverageTimeMatrix=zeros(1,size(LengthsofFilament,2))
 
 LengthStartingPositionsMatrix=zeros(size(LengthsofFilament,2),size(LengthsofFilament,2));
@@ -11,7 +11,7 @@ for h=(1:size(LengthsofFilament,2))
 LengthofFilament=LengthsofFilament(h);    
 
 %---(Single Length) POSITION VERSUS TIME-----------------------------------
-NumberofRuns=10000;
+NumberofRuns=100;
 
 TimeMatrix=zeros(1,LengthofFilament);
 
