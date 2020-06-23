@@ -3,7 +3,6 @@ close all
 
 %---Graphs data for the cont shrink model
 
-
 NumberofRuns=1000;
 
 kOn=1; %Chance of a single motor falling on filament. true kOn is kOn*NumberofFreeMotors*LengthofFilament
