@@ -4,274 +4,323 @@ close all
 %---Graphs data for the cont shrink model
 
 
+%% PARAMETERS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 NumberofRuns=1000;
 
 kOn=1; %Chance of a single motor falling on filament. true kOn is kOn*NumberofFreeMotors*LengthofFilament
 kOff=100; %Set very high to approximate true koff =0
 kWalk=1; %Chance of a single motor walking on filament. true kWalk is kOn*NumberofBoundMotors
 
+parameters=join({'PARAMETERS' num2str([]); 'Runs=' num2str(NumberofRuns); 'kOn=' num2str(kOn); 'kWalk=' num2str(kWalk); 'kOff=' num2str(kOff)});
 
-%~~~GENERATING DATA~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%% ~~~Color Gradients~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-%---20 Starting Length------------------------------------------------------
-
-%---20=Proteins
-fileID=fopen('ContShrinkCLP20L20.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL20(1,:)=1./A(5:4+A(3))';
-LVTL20(1,:)=A(5+A(3):end)';
-
-%---15=Proteins
-fileID=fopen('ContShrinkCLP15L20.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL20(2,:)=1./A(5:4+A(3))';
-LVTL20(2,:)=A(5+A(3):end)';
-
-
-%---10=Proteins
-fileID=fopen('ContShrinkCLP10L20.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL20(3,:)=1./A(5:4+A(3))';
-LVTL20(3,:)=A(5+A(3):end)';
-
-%---5=Proteins
-fileID=fopen('ContShrinkCLP5L20.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL20(4,:)=1./A(5:4+A(3))';
-LVTL20(4,:)=A(5+A(3):end)';
-
-%---1=Proteins
-fileID=fopen('ContShrinkCLP1L20.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL20(5,:)=1./A(5:4+A(3))';
-LVTL20(5,:)=A(5+A(3):end)';
-
-
-%---15 Starting Length------------------------------------------------------
-
-%---20=Proteins
-fileID=fopen('ContShrinkCLP20L15.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL15(1,:)=1./A(5:4+A(3))';
-LVTL15(1,:)=A(5+A(3):end)';
-
-%---15=Proteins
-fileID=fopen('ContShrinkCLP15L15.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL15(2,:)=1./A(5:4+A(3))';
-LVTL15(2,:)=A(5+A(3):end)';
-
-
-%---10=Proteins
-fileID=fopen('ContShrinkCLP10L15.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL15(3,:)=1./A(5:4+A(3))';
-LVTL15(3,:)=A(5+A(3):end)';
-
-%---5=Proteins
-fileID=fopen('ContShrinkCLP5L15.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL15(4,:)=1./A(5:4+A(3))';
-LVTL15(4,:)=A(5+A(3):end)';
-
-%---1=Proteins
-fileID=fopen('ContShrinkCLP1L15.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL15(5,:)=1./A(5:4+A(3))';
-LVTL15(5,:)=A(5+A(3):end)';
-
-
-%---10 Starting Length------------------------------------------------------
-
-%---20=Proteins
-fileID=fopen('ContShrinkCLP20L10.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL10(1,:)=1./A(5:4+A(3))';
-LVTL10(1,:)=A(5+A(3):end)';
-
-%---15=Proteins
-fileID=fopen('ContShrinkCLP15L10.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL10(2,:)=1./A(5:4+A(3))';
-LVTL10(2,:)=A(5+A(3):end)';
-
-
-%---10=Proteins
-fileID=fopen('ContShrinkCLP10L10.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL10(3,:)=1./A(5:4+A(3))';
-LVTL10(3,:)=A(5+A(3):end)';
-
-%---5=Proteins
-fileID=fopen('ContShrinkCLP5L10.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL10(4,:)=1./A(5:4+A(3))';
-LVTL10(4,:)=A(5+A(3):end)';
-
-%---1=Proteins
-fileID=fopen('ContShrinkCLP1L10.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL10(5,:)=1./A(5:4+A(3))';
-LVTL10(5,:)=A(5+A(3):end)';
-
-
-%---10 Starting Length------------------------------------------------------
-
-%---20=Proteins
-fileID=fopen('ContShrinkCLP20L5.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL5(1,:)=1./A(5:4+A(3))';
-LVTL5(1,:)=A(5+A(3):end)';
-
-%---15=Proteins
-fileID=fopen('ContShrinkCLP15L5.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL5(2,:)=1./A(5:4+A(3))';
-LVTL5(2,:)=A(5+A(3):end)';
-
-
-%---10=Proteins
-fileID=fopen('ContShrinkCLP10L5.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL5(3,:)=1./A(5:4+A(3))';
-LVTL5(3,:)=A(5+A(3):end)';
-
-%---5=Proteins
-fileID=fopen('ContShrinkCLP5L5.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL5(4,:)=1./A(5:4+A(3))';
-LVTL5(4,:)=A(5+A(3):end)';
-
-%---1=Proteins
-fileID=fopen('ContShrinkCLP1L5.txt','r');
-formatSpec='%f';
-A=fscanf(fileID, formatSpec);
-
-DepolRateL5(5,:)=1./A(5:4+A(3))';
-LVTL5(5,:)=A(5+A(3):end)';
-
-
-%~~~Finding Slopes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-ProteinNumber=[20 15 10 5 1];
-x=5-(0:2); % one less since trying to show x-> (x-1) not (x+1)-> x
-
-for i=1:size(ProteinNumber,2)
+reds=    [0.4941    0.0235    0.1725
+        0.6627    0.2471    0.3281
+        0.8314    0.4706    0.4837
+        1.0000    0.6941    0.6392];
+oranges=[0.8706    0.3608    0.0196
+        0.9046    0.5739    0.2105
+        0.9386    0.7869    0.4013
+        0.9725    1.0000    0.5922];
+ greens=[0.3059    0.7294    0.1020
+        0.4340    0.8196    0.3438
+        0.5621    0.9098    0.5856
+        0.6902    1.0000    0.8275];
+ blues=[0.0196    0.7216    0.9686
+        0.2745    0.7699    0.9686
+        0.5294    0.8183    0.9686
+        0.7843    0.8667    0.9686];
+purples=[ 0.3059    0.0118    0.6745
+        0.5294    0.2850    0.7830
+        0.7529    0.5582    0.8915
+        0.9765    0.8314    1.0000];
     
-    for h=2:(size(x,2)-1)
+ MasterColorGradient= {reds, oranges,greens, blues, purples};
+ 
+ %% ---MasterColorGradient Description-------------------------------------
+    % {1,1}:{5,1} = Proteins=20:Proteins=1
+       % Rows: Starting Lengths
+
+%% IMPORTING DATA~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+% Currently imports data for starting lengths: 20,15,10,5 with each protein
+% number: 20,15,10,5,1
+
+%Could potentially be automated better, for now add by hand
+
+
+    %---20 Starting Length------------------------------------------------------
+
+    %---20=Proteins
+    fileID=fopen('ContShrinkCLP20L20.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+
+    DepolRateL20(1,:)=1./A(5:4+A(3))';
+    LVTL20(1,:)=A(5+A(3):end)';
+
+    %---15=Proteins
+    fileID=fopen('ContShrinkCLP15L20.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+
+    DepolRateL20(2,:)=1./A(5:4+A(3))';
+    LVTL20(2,:)=A(5+A(3):end)';
+
+
+    %---10=Proteins
+    fileID=fopen('ContShrinkCLP10L20.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+
+    DepolRateL20(3,:)=1./A(5:4+A(3))';
+    LVTL20(3,:)=A(5+A(3):end)';
+
+    %---5=Proteins
+    fileID=fopen('ContShrinkCLP5L20.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+
+    DepolRateL20(4,:)=1./A(5:4+A(3))';
+    LVTL20(4,:)=A(5+A(3):end)';
+
+    %---1=Proteins
+    fileID=fopen('ContShrinkCLP1L20.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+
+    DepolRateL20(5,:)=1./A(5:4+A(3))';
+    LVTL20(5,:)=A(5+A(3):end)';
+    
+    
+    DepolRateCell{1,:,:}=DepolRateL20;
+    LVTCell{1,:,:}=LVTL20;
+    
+
+    %---15 Starting Length------------------------------------------------------
+
+    %---20=Proteins
+    fileID=fopen('ContShrinkCLP20L15.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+
+    DepolRateL15(1,:)=1./A(5:4+A(3))';
+    LVTL15(1,:)=A(5+A(3):end)';
+
+    %---15=Proteins
+    fileID=fopen('ContShrinkCLP15L15.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+
+    DepolRateL15(2,:)=1./A(5:4+A(3))';
+    LVTL15(2,:)=A(5+A(3):end)';
+
+
+    %---10=Proteins
+    fileID=fopen('ContShrinkCLP10L15.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+
+    DepolRateL15(3,:)=1./A(5:4+A(3))';
+    LVTL15(3,:)=A(5+A(3):end)';
+
+    %---5=Proteins
+    fileID=fopen('ContShrinkCLP5L15.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+
+    DepolRateL15(4,:)=1./A(5:4+A(3))';
+    LVTL15(4,:)=A(5+A(3):end)';
+
+    %---1=Proteins
+    fileID=fopen('ContShrinkCLP1L15.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+
+    DepolRateL15(5,:)=1./A(5:4+A(3))';
+    LVTL15(5,:)=A(5+A(3):end)';
+    
+    DepolRateCell{2,:,:}=DepolRateL15;
+    LVTCell{2,:,:}=LVTL15;
+
+
+    %---10 Starting Length------------------------------------------------------
+
+    %---20=Proteins
+    fileID=fopen('ContShrinkCLP20L10.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+
+    DepolRateL10(1,:)=1./A(5:4+A(3))';
+    LVTL10(1,:)=A(5+A(3):end)';
+
+    %---15=Proteins
+    fileID=fopen('ContShrinkCLP15L10.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+
+    DepolRateL10(2,:)=1./A(5:4+A(3))';
+    LVTL10(2,:)=A(5+A(3):end)';
+
+
+    %---10=Proteins
+    fileID=fopen('ContShrinkCLP10L10.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+
+    DepolRateL10(3,:)=1./A(5:4+A(3))';
+    LVTL10(3,:)=A(5+A(3):end)';
+
+    %---5=Proteins
+    fileID=fopen('ContShrinkCLP5L10.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+
+    DepolRateL10(4,:)=1./A(5:4+A(3))';
+    LVTL10(4,:)=A(5+A(3):end)';
+
+    %---1=Proteins
+    fileID=fopen('ContShrinkCLP1L10.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+
+    DepolRateL10(5,:)=1./A(5:4+A(3))';
+    LVTL10(5,:)=A(5+A(3):end)';
+    
+    DepolRateCell{3,:,:}=DepolRateL10;
+    LVTCell{3,:,:}=LVTL10;
+
+
+    %---5 Starting Length------------------------------------------------------
+
+    %---20=Proteins
+    fileID=fopen('ContShrinkCLP20L5.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+
+    DepolRateL5(1,:)=1./A(5:4+A(3))';
+    LVTL5(1,:)=A(5+A(3):end)';
+
+    %---15=Proteins
+    fileID=fopen('ContShrinkCLP15L5.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+
+    DepolRateL5(2,:)=1./A(5:4+A(3))';
+    LVTL5(2,:)=A(5+A(3):end)';
+
+
+    %---10=Proteins
+    fileID=fopen('ContShrinkCLP10L5.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+
+    DepolRateL5(3,:)=1./A(5:4+A(3))';
+    LVTL5(3,:)=A(5+A(3):end)';
+
+    %---5=Proteins
+    fileID=fopen('ContShrinkCLP5L5.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+
+    DepolRateL5(4,:)=1./A(5:4+A(3))';
+    LVTL5(4,:)=A(5+A(3):end)';
+
+    %---1=Proteins
+    fileID=fopen('ContShrinkCLP1L5.txt','r');
+    formatSpec='%f';
+    A=fscanf(fileID, formatSpec);
+    
+    DepolRateL5(5,:)=1./A(5:4+A(3))';
+    LVTL5(5,:)=A(5+A(3):end)';
+    
+    
+    DepolRateCell{4,:,:}=DepolRateL5;
+    LVTCell{4,:,:}=LVTL5;
         
-        y=DepolRateL5(i,:);
+%% ---Data Cells Description------------------------------------------------
+
+    % DepolRateCell and LVTCell:
+            % {1,1}=Starting Length 20
+            % {2,1}=Starting Length 15
+            % {3,1}=Starting Length 10
+            % {4,1}=Starting Length 5
+            
+                % Rows: Proteins
+                % Columns: Length
+                
+                
+%% ~~~Finding Depol Instantaneous Slopes~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%Finds the instantaneous slope of the DepolRate at each L
+
+Proteins=[20 15 10 5 1];
+StartingLengths=[20 15 10 5];
+
+for h=1:size(StartingLengths,2)
+    
+    DepolSlopeMatrix=[0];
+    
+    for i=1:size(Proteins,2)
         
-        slopematrix(i,h-1)=(y(h)-y(h-1))/(x(h)-x(h-1));
-    
-    
+        ProteinNumber=Proteins(i);
+        StartingLength=StartingLengths(h);
+        
+        shrink=StartingLength-(0:(StartingLength-3));
+        
+        DepolMatrix=DepolRateCell{h,1};
+        y=DepolMatrix(i,:);
+        
+       
+        
+        for j=2:(size(shrink,2))
+            
+            DepolSlopeMatrix(i,j-1)=(y(j)-y(j-1))/(shrink(j)-shrink(j-1))
+            
+        end
+
     end
+    
+    DepolSlopeCell{h,1}=DepolSlopeMatrix;
 end
 
+%% PLOTTING~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+%% ---Length V Time--------------------------------------------------------
 
 
-
-
-%~~~PLOTTING~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-%---Length V Time---------------------------------------------------------------
-
-proteincolors =    [139, 0, 139
-             0 191 255
-             154 205 50
-             255 165   0
-             178 34 34]./255; %Taken from wiki/Web_Colors list (all divided by 255 bc that is MATLAB'S standard]
-
-lengthcolors=[ 1.0000 0 1.0000
-    0.6667    0.3333    1.0000
-    0.3333    0.6667    1.0000
-         0    1.0000    1.0000];       
-         
-redcolors=[0.5451 0 0
-    0.6588    0.1784    0.1892
-    0.7725    0.3569    0.3784
-    0.8863    0.5353    0.5676
-    1.0000    0.7137    0.7569]; %gradients made using ColorGradient.m file
-
-orangecolors= [1.0000 0.5490 0
-    0.9853    0.6373    0.1373
-    0.9706    0.7255    0.2745
-    0.9559    0.8137    0.4118
-    0.9412    0.9020    0.5490];
-
-greencolors=[ 0.6039    0.8039    0.1961
-    0.4529    0.7284    0.2725
-    0.3020    0.6529    0.3490
-    0.1510    0.5775    0.4255
-         0    0.5020    0.5020];
-
-bluecolors= [ 0    1.0000    1.0000
-    0.0735    0.7500    0.8775
-    0.1471    0.5000    0.7549
-    0.2206    0.2500    0.6324
-    0.2941         0    0.5098];
-    
-   
-    
-
-%---20=Starting Length---
 figure(1)
 
-ProteinNumber=[20 15 10 5 1];
-for i=1:size(LVTL20,1)
+ProteinNumbers=[20 15 10 5 1];
+StartingLengths=[20 15 10 5];
+
+for h=1:size(StartingLengths,2)
     
-    x=LVTL20(i,:);
-    y=20-(0:18);
+    LVT=LVTCell{h,1};
+    StartingLength=StartingLengths(h)
+
+for i=1:size(ProteinNumbers,2)
+    
+    x=LVT(i,:);
+    y=StartingLength-(0:StartingLength-2);
+    
+    color=MasterColorGradient{i};
+    color=color(h,:);
     
     p=plot(x,y)
-    p.DisplayName=['Starting Length = 20 | Proteins = ' num2str(ProteinNumber(i))];
+    p.DisplayName=['Starting Length = 20 | Proteins = ' num2str(ProteinNumbers(i))];
     p.LineWidth=4;
 %     p.Color=proteincolors(i,:); % for changing protein concentration
-    p.Color=redcolors(6-i,:); %for changing starting lengths
+    p.Color=color; %for changing starting lengths
     
     hold on
     
 end
 
-% legend show
+end
+
+ legend show
 
 %---Setting Titles
 xlabel('Total Time Elapsed (in units time)');
@@ -280,168 +329,43 @@ title('Total Time For Filament To Depolymerize From L to L-x');
 
 %---Setting Figure Properties
 set(gca, 'fontsize',20);
-set(gca, 'YLim',[min(y),max(y)]); %graph for some reason showing one blank data point at bottom, this fixes that (max(xavg)=LengthofFilament-1)
+set(gca, 'YLim',[2,20]); %graph for some reason showing one blank data point at bottom, this fixes that (max(xavg)=LengthofFilament-1)
 
 
-% %---Paremter Textbox
-% parameters=join({'Starting Filament Length= ' num2str(20); 'Runs=' num2str(NumberofRuns); 'kOn=' num2str(kOn); 'kWalk=' num2str(kWalk); 'kOff=' num2str(kOff)});
-% 
-% ParTextbox=annotation('textbox', [0.5, 0.5, 0.1, 0.1], 'String', parameters, 'FitBoxToText','on'); %text box horizontally offset (from left) 70% of figure's width & vertically offset (from bottom) 80%. Box fits around text. Default Height is 10% of height x 10% width
-% ParTextbox.FontSize=14;
-% ParTextbox.FontName='FixedWidth'; % To match data figure 2
-
-% hold off
-
-%---15=Starting Length---
-% figure(2)
-ProteinNumber=[20 15 10 5 1];
-
-for i=1:size(LVTL15,1)
-    
-    x=LVTL15(i,:);
-    y=15-(0:13);
-    
-    p=plot(x,y)
-    p.DisplayName=['Starting Length = 15 | Proteins = ' num2str(ProteinNumber(i))];
-    p.LineWidth=2;
-    %     p.Color=proteincolors(i,:); % for changing protein concentration
-    p.Color=orangecolors(6-i,:); %for changing starting lengths
-    
-    
-    hold on
-    
-end
-
-% legend show
-
-%---Setting Titles
-xlabel('Total Time Elapsed (in units time)');
-ylabel('Length of Filament (in Monomers)');
-title('Total Time For Filament To Depolymerize From L to L-x');
-
-%---Setting Figure Properties
-set(gca, 'fontsize',20);
-set(gca, 'YLim',[min(y),max(y)]); %graph for some reason showing one blank data point at bottom, this fixes that (max(xavg)=LengthofFilament-1)
-
-
-% %---Paremter Textbox
-% parameters=join({'Starting Filament Length= ' num2str(15); 'Runs=' num2str(NumberofRuns); 'kOn=' num2str(kOn); 'kWalk=' num2str(kWalk); 'kOff=' num2str(kOff)});
-% 
-% ParTextbox=annotation('textbox', [0.3, 0.2, 0.1, 0.1], 'String', parameters, 'FitBoxToText','on'); %text box horizontally offset (from left) 70% of figure's width & vertically offset (from bottom) 80%. Box fits around text. Default Height is 10% of height x 10% width
-% ParTextbox.FontSize=20;
-% ParTextbox.FontName='FixedWidth'; % To match data figure 2
-
-% hold off
-%---10=Starting Length---
-% figure(3)
-
-ProteinNumber=[20 15 10 5 1];
-for i=1:size(LVTL10,1)
-    
-    x=LVTL10(i,:);
-    y=10-(0:8);
-    
-    p=plot(x,y)
-    p.DisplayName=['Starting Length = 10 | Proteins = ' num2str(ProteinNumber(i))];
-    p.LineWidth=2;
-    %     p.Color=proteincolors(i,:); % for changing protein concentration
-    p.Color=greencolors(6-i,:); %for changing starting lengths
-    
-    
-    hold on
-    
-end
-
-% legend show
-
-%---Setting Titles
-xlabel('Total Time Elapsed (in units time)');
-ylabel('Length of Filament (in Monomers)');
-title('Total Time For Filament To Depolymerize From L to L-x');
-
-%---Setting Figure Properties
-set(gca, 'fontsize',20);
-set(gca, 'YLim',[min(y),max(y)]); %graph for some reason showing one blank data point at bottom, this fixes that (max(xavg)=LengthofFilament-1)
-
-
-% %---Paremter Textbox
-% parameters=join({'Starting Filament Length= ' num2str(10); 'Runs=' num2str(NumberofRuns); 'kOn=' num2str(kOn); 'kWalk=' num2str(kWalk); 'kOff=' num2str(kOff)});
-% 
-% ParTextbox=annotation('textbox', [0.5, 0.5, 0.1, 0.1], 'String', parameters, 'FitBoxToText','on'); %text box horizontally offset (from left) 70% of figure's width & vertically offset (from bottom) 80%. Box fits around text. Default Height is 10% of height x 10% width
-% ParTextbox.FontSize=14;
-% ParTextbox.FontName='FixedWidth'; % To match data figure 2
-
-% hold off
-
-%---5=Starting Length---
-
-% figure(4)
-
-ProteinNumber=[20 15 10 5 1];
-for i=1:size(LVTL5,1)
-    
-    x=LVTL5(i,:);
-    y=5-(0:3);
-    
-    p=plot(x,y)
-    p.DisplayName=['Starting Length = 5 | Proteins = ' num2str(ProteinNumber(i))];
-    p.LineWidth=2;
-    %     p.Color=proteincolors(i,:); % for changing protein concentration
-    p.Color=bluecolors(6-i,:); %for changing starting lengths
-    
-    
-    hold on
-    
-end
-
-legend show
-legend('Location','northeast')
-
-%---Setting Titles
-xlabel('Total Time Elapsed (in units time)');
-ylabel('Length of Filament (in Monomers)');
-title('Total Time For Filament To Depolymerize From L to L-x');
-
-%---Setting Figure Properties
-set(gca, 'fontsize',20);
-set(gca, 'YLim',[min(y),max(y)]); %graph for some reason showing one blank data point at bottom, this fixes that (max(xavg)=LengthofFilament-1)
-set(gca, 'OuterPosition', [0,0,1,1]); % graph starts 0 away from left edge, 20% away from bottom edge, takes up 100% space from left-to-right, & 85% space up-to-down (100%-15%)
-
-
-%---Parameter Textbox
-parameters=join({'Starting Filament Length= ' num2str(5); 'Runs=' num2str(NumberofRuns); 'kOn=' num2str(kOn); 'kWalk=' num2str(kWalk); 'kOff=' num2str(kOff)});
-
-ParTextbox=annotation('textbox', [0.6, 0.19, 0.1, 0.1], 'String', parameters, 'FitBoxToText','on'); %text box horizontally offset (from left) 70% of figure's width & vertically offset (from bottom) 80%. Box fits around text. Default Height is 10% of height x 10% width
+% %---Parameter Textbox
+ParTextbox=annotation('textbox', [0.5, 0.5, 0.1, 0.1], 'String', parameters, 'FitBoxToText','on'); %text box horizontally offset (from left) 70% of figure's width & vertically offset (from bottom) 80%. Box fits around text. Default Height is 10% of height x 10% width
 ParTextbox.FontSize=20;
 ParTextbox.FontName='FixedWidth'; % To match data figure 2
 
 % hold off
 
-set(gca, 'YLim',[2,20]); %otherwise, ylim goes off of 5 from last plot
-% % If you want to zoom in on lower x values
-%     set(gca, 'XLim',[0,200]); % Zoom 1 (can see starting length =10 and =15 clearly)
-    set(gca, 'XLim',[0,50]); % Zoom 2 (can see starting length =5 and =10 clearly)
+%% ---Depol V Length, by Starting Length-----------------------------------
 
 
-%---Depol V Length---------------------------------------------------------------
-
-%---20 Start Length
 
 figure(2)
 
-
-    ProteinNumber=[20 15 10 5 1];
-for i=1:size(DepolRateL20,1)
+    ProteinNumbers=[20 15 10 5 1];
+    StartingLengths=[20 15 10 5];
+   
+for h=1:size(StartingLengths,2)
     
-    x=20-(0:17); % one less since trying to show x-> (x-1) not (x+1)-> x
-    y=DepolRateL20(i,:);
+    DepolRate=DepolRateCell{h,1};
+    StartingLength=StartingLengths(h);
+    
+for i=1:size(ProteinNumbers,2)
+    
+    x=StartingLength-(0:StartingLength-3); % one less since trying to show x-> (x-1) not (x+1)-> x
+    y=DepolRate(i,:);
+    
+    color=MasterColorGradient{i};
+    color=color(h,:);
     
     p=plot(x,y)
-    p.DisplayName=[num2str(ProteinNumber(i)) ' Proteins, Starting Length = 20'];
+    p.DisplayName=[num2str(ProteinNumbers(i)) ' Proteins, Starting Length = ' num2str(StartingLength)];
     p.LineWidth=2;
-    p.Color=proteincolors(i,:); % For plotting graph individually
-%     p.Color=redcolors(i,:); % For plotting graph with others
-    set(get(get(p(1),'Annotation'),'LegendInformation'),'IconDisplayStyle','off'); %makes this line not show up in the legend (when graphing all at once, only want each color once)
+    p.Color=color; % For plotting graph individually
+%     set(get(get(p(1),'Annotation'),'LegendInformation'),'IconDisplayStyle','off'); %makes this line not show up in the legend (when graphing all at once, only want each color once)
    
     
     hold on
@@ -457,6 +381,7 @@ for i=1:size(DepolRateL20,1)
    
     hold on
     
+end
 end
 
 legend show
@@ -468,185 +393,107 @@ title('Depolymerization Rate At L to L-1');
 
 %---Setting Figure Properties
 set(gca, 'fontsize',20);
-set(gca, 'XLim',[min(x),max(x)]);
-
-% % %---Paremter Textbox
-% parameters=join({'Starting Filament Length= ' num2str(20); 'Runs=' num2str(NumberofRuns); 'kOn=' num2str(kOn); 'kWalk=' num2str(kWalk); 'kOff=' num2str(kOff)});
-% 
-% ParTextbox=annotation('textbox', [0.2, 0.8, 0.1, 0.1], 'String', parameters, 'FitBoxToText','on'); %text box horizontally offset (from left) 70% of figure's width & vertically offset (from bottom) 80%. Box fits around text. Default Height is 10% of height x 10% width
-% ParTextbox.FontSize=14;
-% ParTextbox.FontName='FixedWidth'; % To match data figure 2
-
-%---15 Start Length
-
-% figure(3)
-
-    ProteinNumber=[20 15 10 5 1];
-for i=1:size(DepolRateL15,1)
-    
-    x=15-(0:12); % one less since trying to show x-> (x-1) not (x+1)-> x
-    y=DepolRateL15(i,:);
-    
-    p=plot(x,y)
-    p.DisplayName=[num2str(ProteinNumber(i)) ' Proteins, Starting Length = 15'];
-    p.LineWidth=2;
-     p.Color=proteincolors(i,:); % For plotting graph individually
-%     p.Color=orangecolors(i,:); % For plotting graph with others
-    set(get(get(p(1),'Annotation'),'LegendInformation'),'IconDisplayStyle','off'); %makes this line not show up in the legend (when graphing all at once, only want each color once)
-   
-   hold on
-    
-    xstart=max(x);
-    yfind=find(x==xstart);
-    ystart=y(yfind);
-    m=plot(xstart,ystart,'<')
-    m.MarkerSize=10;
-    m.MarkerFaceColor=p.Color;
-    m.MarkerEdgeColor=p.Color;
-    set(get(get(m(1),'Annotation'),'LegendInformation'),'IconDisplayStyle','off'); %makes this dot not show up in the legend
-   
-    hold on
-    
-    
-end
-
-legend show
-
-%---Setting Titles
-xlabel('L = Length of Filament Before Depolymerization (in monomers)');
-ylabel('Depolymerization Rate (in units time)');
-title('Depolymerization Rate At L to L-1');
-
-%---Setting Figure Properties
-set(gca, 'fontsize',20);
-set(gca, 'XLim',[min(x),max(x)]);
-
-% % %---Paremter Textbox
-% parameters=join({'Starting Filament Length= ' num2str(15); 'Runs=' num2str(NumberofRuns); 'kOn=' num2str(kOn); 'kWalk=' num2str(kWalk); 'kOff=' num2str(kOff)});
-% 
-% ParTextbox=annotation('textbox', [0.2, 0.8, 0.1, 0.1], 'String', parameters, 'FitBoxToText','on'); %text box horizontally offset (from left) 70% of figure's width & vertically offset (from bottom) 80%. Box fits around text. Default Height is 10% of height x 10% width
-% ParTextbox.FontSize=14;
-% ParTextbox.FontName='FixedWidth'; % To match data figure 2
-
-
-%---10 Start Length
-
-% figure(4)
-
-    ProteinNumber=[20 15 10 5 1];
-for i=1:size(DepolRateL10,1)
-    
-    x=10-(0:7); % one less since trying to show x-> (x-1) not (x+1)-> x
-    y=DepolRateL10(i,:);
-    
-    p=plot(x,y)
-    p.DisplayName=[num2str(ProteinNumber(i)) ' Proteins, Starting Length = 10'];
-    p.LineWidth=2;
-    p.Color=proteincolors(i,:); % For plotting graph individually
-%     p.Color=greencolors(i,:); % For plotting graph with others
-    set(get(get(p(1),'Annotation'),'LegendInformation'),'IconDisplayStyle','off'); %makes this line not show up in the legend (when graphing all at once, only want each color once)
-   
-   hold on
-    
-    xstart=max(x);
-    yfind=find(x==xstart);
-    ystart=y(yfind);
-    m=plot(xstart,ystart,'<')
-    m.MarkerSize=10;
-    m.MarkerFaceColor=p.Color;
-    m.MarkerEdgeColor=p.Color;
-    set(get(get(m(1),'Annotation'),'LegendInformation'),'IconDisplayStyle','off'); %makes this dot not show up in the legend
-   
-    hold on
-    
-    
-end
-
-legend show
-
-%---Setting Titles
-xlabel('Length of Filament Before Depolymerization (in monomers)');
-ylabel('Time Until Depolymerization (in units time)');
-title('Time For Single Depolymerization Event From L to L-1');
-
-%---Setting Figure Properties
-set(gca, 'fontsize',20);
-set(gca, 'XLim',[min(x),max(x)]);
-
-
-% % %---Paremter Textbox
-% parameters=join({'Starting Filament Length= ' num2str(10); 'Runs=' num2str(NumberofRuns); 'kOn=' num2str(kOn); 'kWalk=' num2str(kWalk); 'kOff=' num2str(kOff)});
-% 
-% ParTextbox=annotation('textbox', [0.2, 0.8, 0.1, 0.1], 'String', parameters, 'FitBoxToText','on'); %text box horizontally offset (from left) 70% of figure's width & vertically offset (from bottom) 80%. Box fits around text. Default Height is 10% of height x 10% width
-% ParTextbox.FontSize=14;
-% ParTextbox.FontName='FixedWidth'; % To match data figure 2
-
-%---5 Start Length
-
-% figure(5)
-
-    ProteinNumber=[20 15 10 5 1];
-for i=1:size(DepolRateL5,1)
-    
-    x=5-(0:2); % one less since trying to show x-> (x-1) not (x+1)-> x
-    y=DepolRateL5(i,:);
-    
-    p=plot(x,y)
-%     p.DisplayName=[num2str(ProteinNumber(i)) ' Proteins, Starting Length = 5']; %when only making this graph
-    p.DisplayName=[num2str(ProteinNumber(i)) ' Proteins']; %when plotting all graphs at once
-    p.LineWidth=2;
-     p.Color=proteincolors(i,:); % For plotting graph individually
-%     p.Color=bluecolors(i,:); % For plotting graph with others
-    
-   hold on
-    
-    xstart=max(x);
-    yfind=find(x==xstart);
-    ystart=y(yfind);
-    m=plot(xstart,ystart,'<')
-    m.MarkerSize=10;
-    m.MarkerFaceColor=p.Color;
-    m.MarkerEdgeColor=p.Color;
-    set(get(get(m(1),'Annotation'),'LegendInformation'),'IconDisplayStyle','off'); %makes this dot not show up in the legend
-   
-    hold on
-    
-    
-end
-
-legend show
-
-%---Setting Titles
-xlabel('L = Length of Filament Before Depolymerization (in monomers)');
-ylabel('Depolymerization Rate (in units time)');
-title('Depolymerization Rate At L to L-1');
-
-%---Setting Figure Properties
-set(gca, 'fontsize',20);
-set(gca, 'XLim',[min(x),max(x)]);
-
-% % %---Parameter Textbox
-% parameters=join({'Starting Filament Length= ' num2str(5); 'Runs=' num2str(NumberofRuns); 'kOn=' num2str(kOn); 'kWalk=' num2str(kWalk); 'kOff=' num2str(kOff)});
-% 
-% ParTextbox=annotation('textbox', [0.2, 0.8, 0.1, 0.1], 'String', parameters, 'FitBoxToText','on'); %text box horizontally offset (from left) 70% of figure's width & vertically offset (from bottom) 80%. Box fits around text. Default Height is 10% of height x 10% width
-% ParTextbox.FontSize=14;
-% ParTextbox.FontName='FixedWidth'; % To match data figure 2
-
-set(gca, 'XLim',[3,10]);
-set(gca, 'YLim',[0,3]);
+set(gca, 'XLim',[3,20]);
 
 % %---Parameter Textbox
-parameters=join({'Runs=' num2str(NumberofRuns); 'kOn=' num2str(kOn); 'kWalk=' num2str(kWalk); 'kOff=' num2str(kOff)});
+ParTextbox=annotation('textbox', [0.2, 0.8, 0.1, 0.1], 'String', parameters, 'FitBoxToText','on'); %text box horizontally offset (from left) 70% of figure's width & vertically offset (from bottom) 80%. Box fits around text. Default Height is 10% of height x 10% width
+ParTextbox.FontSize=20;
+ParTextbox.FontName='FixedWidth'; % To match data figure 2
 
-ParTextbox=annotation('textbox', [0.75, 0.6, 0.1, 0.1], 'String', parameters, 'FitBoxToText','on'); %text box horizontally offset (from left) 70% of figure's width & vertically offset (from bottom) 80%. Box fits around text. Default Height is 10% of height x 10% width
+%Labelling triangles
+TriAn=annotation('textarrow',[.8 .9],[.2 .15],'String','Triangles Show Starting Length');
+TriAn.FontSize=20;
+TriAn.FontName='FixedWidth';
+
+
+%---Zoom Views
+
+%     % Zoom 1
+%         set(gca, 'XLim',[10,20]);
+%         
+%         %Labelling triangles
+%         TriAn=annotation('textarrow',[.6 .9],[.5 .15],'String','Triangles Show Starting Length');
+%         TriAn.FontSize=20;
+%         TriAn.FontName='FixedWidth';
+%         
+%     % Zoom 2
+%         set(gca, 'XLim',[3,10]);
+%         set(gca, 'YLim',[0,3]);
+%         
+%         %Labelling triangles
+%         TriAn=annotation('textarrow',[.8 .9],[.22 .15],'String','Triangles Show Starting Length');
+%         TriAn.FontSize=20;
+%         TriAn.FontName='FixedWidth'
+        
+%% ---Depol V Length, by Protein Number------------------------------------
+
+    ProteinNumbers=[20 15 10 5 1];
+    StartingLengths=[20 15 10 5];
+   
+for i=1:size(ProteinNumbers,2)
+    
+    figure(2+i)
+    
+    
+    for h=1:size(StartingLengths,2)
+        
+        
+        DepolRate=DepolRateCell{h,1};
+        StartingLength=StartingLengths(h);
+    
+        x=StartingLength-(0:StartingLength-3); % one less since trying to show x-> (x-1) not (x+1)-> x
+        y=DepolRate(i,:);
+        
+        color=MasterColorGradient{i};
+        color=color(h,:);
+
+        p=plot(x,y)
+        p.DisplayName=['Starting Length = ' num2str(StartingLength)];
+        p.LineWidth=2;
+        p.Color=color;
+    %     set(get(get(p(1),'Annotation'),'LegendInformation'),'IconDisplayStyle','off'); %makes this line not show up in the legend (when graphing all at once, only want each color once)
+
+
+        hold on
+
+        xstart=max(x);
+        yfind=find(x==xstart);
+        ystart=y(yfind);
+        m=plot(xstart,ystart,'<')
+        m.MarkerSize=10;
+        m.MarkerFaceColor=p.Color;
+        m.MarkerEdgeColor=p.Color;
+        set(get(get(m(1),'Annotation'),'LegendInformation'),'IconDisplayStyle','off'); %makes this dot not show up in the legend
+
+        hold on
+
+    end
+    
+    legend show
+
+%---Setting Titles
+xlabel('L = Length of Filament Before Depolymerization (in monomers)');
+ylabel('Depolymerization Rate (in units time)');
+title(['Depolymerization Rate At L to L-1 for ' num2str(ProteinNumbers(i)) ' Proteins at Four Different Starting Lengths'] );
+
+%---Setting Figure Properties
+set(gca, 'fontsize',20);
+set(gca, 'XLim',[3,20]);
+    % If you want to zoom in on lower x values
+%     set(gca, 'XLim',[17,20]); % Zoom 3
+%     set(gca, 'YLim',[0,.3]); % Zoom 3
+
+% %---Parameter Textbox
+ParTextbox=annotation('textbox', [0.2, 0.8, 0.1, 0.1], 'String', parameters, 'FitBoxToText','on'); %text box horizontally offset (from left) 70% of figure's width & vertically offset (from bottom) 80%. Box fits around text. Default Height is 10% of height x 10% width
 ParTextbox.FontSize=20;
 ParTextbox.FontName='FixedWidth'; % To match data figure 2
 
 %Labelling triangles
 TriAn=annotation('textarrow',[.8 .9],[.3 .15],'String','Triangles Show Starting Length');
 TriAn.FontSize=20;
-TriAn.FontName='FixedWidth';
+TriAn.FontName='FixedWidth';    
+    
+end
 
-% % If you want to zoom in on lower x values
-   set(gca, 'XLim',[17,20]); % Zoom 3
-   set(gca, 'YLim',[0,.3]); % Zoom 3 
+
+ 
