@@ -41,7 +41,7 @@ purples=[ 0.3059    0.0118    0.6745
  
  %% ---MasterColorGradient Description-------------------------------------
     % {1,1}:{5,1} = Proteins=20:Proteins=1
-        % Rows: Starting Lengths
+       % Rows: Starting Lengths
 
 %% IMPORTING DATA~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 % Currently imports data for starting lengths: 20,15,10,5 with each protein
