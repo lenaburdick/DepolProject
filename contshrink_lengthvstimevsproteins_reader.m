@@ -13,7 +13,6 @@ kWalk=1; %Chance of a single motor walking on filament. true kWalk is kOn*Number
 
 %~~~GENERATING DATA~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
 %---20 Starting Length------------------------------------------------------
 
 %---20=Proteins
