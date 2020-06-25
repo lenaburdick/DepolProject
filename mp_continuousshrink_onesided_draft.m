@@ -15,9 +15,10 @@ close all
 %---Parameters-------------------------------------------------------------
 NumberofRuns=1000;
 
-StartingLength=5; %Number of monomers in filament initially
-ShrinkAmount=3; %How many monomers will fall off during simulation
-NumberofProteins=1; %Number of Proteins in system (stand-in for concentration)
+StartingLength=50; %Number of monomers in filament initially
+ShrinkAmount=StartingLength-2; %How many monomers will fall off during simulation
+NumberofProteins=50; %Number of Proteins in system (stand-in for concentration)
+filename=['ContShrinkP' num2str(NumberofProteins) 'L' num2str(StartingLength) '.txt'] %Keeps you from having to scroll to bottom to change
 
 kOn=1; %Chance of a single motor falling on filament. true kOn is kOn*NumberofFreeMotors*LengthofFilament
 kOff=100; %Set very high to approximate true koff =0
@@ -302,7 +303,7 @@ hold off
 
 DataToTrack=[StartingLength NumberofProteins size(yavg,2) size(xavg,2) yavg xavg]
 
-fileID3 = fopen('ContShrinkCLP1L5.txt','a'); 
+fileID3 = fopen(filename,'a'); 
 fprintf(fileID3,'%12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f\r\n',DataToTrack'); %Don't know why this was chosen
 fclose(fileID3);
 
