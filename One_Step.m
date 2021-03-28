@@ -17,14 +17,21 @@ proteins=[5 20 80];
 kLand=.091; %Chance of a single motor falling on filament. true kOn is kOn*NumberofFreeMotors*LengthofFilament
 kAssist=100; 
 kWalk=1; %Chance of a single motor walking on filament. true kWalk is kWalk*NumberofBoundMotors
-kFall=1000; %1; % Chance of a single protein falling off (not at end)
-kUnassisted=0; %200; % Chance filament will depolymerize without a protein at the end
+kFall=0; % Chance of a single protein falling off (not at end)
+kUnassisted=0; % Chance filament will depolymerize without a protein at the end
 
 %-Other Parameters-------------------------------------------------------
-NumberofRuns=1000;
+NumberofRuns=2;
 MinFilamentSize=2; %How small the filament will shrink to 
 BoundEffect=0; %0 if free proteins constant, 1 if free proteins change
 DirectEndBinding=0; %if DirectEndBinding=1, proteins can only land on end, if =0, they can land anywhere on filament
+
+
+
+%---Cells------------------------------------------------------------------
+ProteinTrackingCell=cell(size(lengths,2), size(proteins,2), NumberofRuns);
+OccupancyMatrixCell=cell(size(lengths,2), size(proteins,2), NumberofRuns);
+OutcomeMatrixCell=cell(size(lengths,2), size(proteins,2), NumberofRuns);
 
 
 
@@ -34,7 +41,7 @@ for l=1:size(lengths,2)
 w=1; %~~~Proteins Loop~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 for w=1:size(proteins,2)
     
-clearvars -except l w lengths concentrations
+clearvars -except l w lengths proteins kLand kAssist kWalk kFall kUnassisted NumberofRuns MinFilamentSize BoundEffect DirectEndBinding mainfilename %%% add the tracking cells to this too
 
 %---Initializing Starting Length & Proteins--------------------------------
 StartingLength=lengths(l); %Number of monomers in filament initially
@@ -55,14 +62,19 @@ TextboxColor=[1 1 1]; %[0.471 0.116 0.161];
 
 
 %---Tracking Matrices------------------------------------------------------
-NumberBoundCell=cell(NumberofRuns, 1);
-OutcomeCell=cell(NumberofRuns, 1);
-DTCell=cell(NumberofRuns, 1);
-ProteinTrackingCell=cell(NumberofRuns, 1);
+% % % NumberBoundCell=cell(NumberofRuns, 1);
+% % % OutcomeCell=cell(NumberofRuns, 1);
+% % % DTCell=cell(NumberofRuns, 1);
+% % % ProteinTrackingCell=cell(NumberofRuns, 1);
 
 % kOnTrackingCell=cell(NumberofRuns, 1);
 % kWalkTrackingCell=cell(NumberofRuns, 1);
 % kAssistTrackingCell=cell(NumberofRuns, 1);
+
+
+
+
+
 
 TimeAtLength=zeros(NumberofRuns, ShrinkAmount); %Time Spent at each length
 TimeAtLengthCum=zeros(NumberofRuns, ShrinkAmount); %Time spent at each length, cumulative
@@ -78,53 +90,75 @@ CurrentLength=StartingLength;
 NumberofMonomers=CurrentLength+1;
 
 %---Motor Tracking Matrix
-ProteinTrackingMatrix=zeros(1,10); 
+ProteinTrackingMatrix=zeros(1,13); 
 ProteinTrackingMatrix(1,1)=(1);
-    %first column is the motor number
-    %second is the time it landed
-    %third is position it landed in
-    %fourth is current position
-    %fifth is the position it fell off from
-    %sixth is time when fell off
-    %seventh is position # it depolled from (length of filament at that time)
-    %eighth is time when it reached end
-    %ninth is time when it depoled
-    %tenth=1 if the filament Depoled independently (instead of with assistance from a protein
-    
-
-        %The proteins are numbered as they land
-        
-        
+    % 1: motor number
+            %The proteins are numbered as they land
+    % 2: step it landed
+    % 3: time it landed
+    % 4: position it landed in
+    % 5: length of filament when it landed
+    % 6: current Position
+    % 7: number of walk steps it took
+    % 8: step when it fell off
+    % 9: time when it fell off
+    % 10: position it fell from
+    % 11: length of filament when it fell
+    % 12: Did the protein assist the depolymerization (1=yes, 0=no)
+    % 13: How long did the protein spend on the end?
+  
+                 
 OccupancyMatrix=zeros(1,NumberofMonomers); % Shows how many proteins are on each monomer at a given time
+    %Each column is a different monomer
+    %Each row is a different step
+    
+OutcomeMatrix=zeros(1,12); %Shows outcome (on, off, or walk) of each step of simulation
+    %Each column is a different data point
+        % 1: Step Number
+        % 2: (Total) DT
+        % 3: Length
+        % 4: Number of Bound Proteins
+        % 5: Outcome (1,2,3,4, or 5 for each rate)
+        % 6: Walk Protein (If applicable, 0 otherwise)
+        % 7: Walk Direction (If applicable, 0 otherwise)
+        % 8: True kOn
+        % 9: True kAssist
+        % 10: True kWalk
+        % 11: True kFall
+        % 12: True kUnassisted (same as kUnassisted)
+    %Each row is a different step
+
 
 
 ProteinsLanded=0;
 DepolEvents=0;
 
 DT=0;
-
 j=0; % Way of tracking number of runs through while loop
 
 BoundProteins(1)=0; %Shows how many proteins bound at each step
-OutcomeArray(1)=0; %Shows outcome (on, off, or walk) of each step of simulation
 
 
-% OccupancyArray=zeros(1,NumberofMonomers);
 
 FreeProteins(1)=TotalProteins;
 
-kOnTrackingArray=0;
-kWalkTrackingArray=0;
-kAssistTrackingArray=0;
-kFallTrackingArray=0;
-kDepolTrackingArray=0;
+% % % kOnTrackingArray=0;
+% % % kWalkTrackingArray=0;
+% % % kAssistTrackingArray=0;
+% % % kFallTrackingArray=0;
+% % % kDepolTrackingArray=0;
+
+
+OccupancyArray=zeros(1,NumberofMonomers);
 
 
 while DepolEvents<ShrinkAmount
     
+    
 j=j+1;
     
-OccupancyArray=OccupancyMatrix(end,:);
+OccupancyArray=OccupancyMatrix(end,:); %gets the last value of the occupancy array... is this necessary?
+
 
     
 %---Setting Rates----------------------------------------------------------
@@ -306,8 +340,9 @@ kDepolTrackingArray=k5;
     
   
 BoundProteins(j+1)=size(ProteinTrackingMatrix(ProteinTrackingMatrix(:,4)>0),1); %Tracks how many proteins are bound to the filament during this step
-OutcomeArray(j+1)=Outcome; %Tracks what the outcome is this step
+OutcomeMatrix(j+1)=Outcome; %Tracks what the outcome is this step
 OccupancyMatrix=[OccupancyMatrix;OccupancyArray];
+
 
 %     Outcome
 %     DT(j)
@@ -318,15 +353,20 @@ OccupancyMatrix=[OccupancyMatrix;OccupancyArray];
 %     BoundProteins(j+1)
 
   
+ProteinTrackingMatrix
+% OccupancyMatrix
+OccupancyArray
+
+
 end
 
 %---Tracking/Storing Data in Cells-----------------------------------------
 NumberBoundCell{h,1}=BoundProteins;
-OutcomeCell{h,1}=OutcomeArray;
+OutcomeCell{h,1}=OutcomeMatrix;
 DTCell{h,1}=DT;
 
 ProteinTrackingCell{h}=ProteinTrackingMatrix;
-OccupancyCell{h}=OccupancyMatrix;
+OccupancyCell{l,w,h}=OccupancyMatrix;
 
 
 end
@@ -462,10 +502,10 @@ hold off
 % 
 
 FigName=[filename 'LengthTime.jpg'];
-saveas(gcf,FigName); %saves current figure (gcf) as a jpeg (extension specified in name)
+% % % % saveas(gcf,FigName); %saves current figure (gcf) as a jpeg (extension specified in name)
 
 FigName=[filename 'LengthTime.eps'];
-saveas(gcf,FigName); %saves current figure (gcf) as a eps for Adobe Illustrator (extension specified in name)
+% % % saveas(gcf,FigName); %saves current figure (gcf) as a eps for Adobe Illustrator (extension specified in name)
 
 
 
@@ -553,15 +593,15 @@ DesTextbox.FontSize=12;
 hold off
 
 FigName=[filename 'DepolTime.jpg'];
-saveas(gcf,FigName); %saves current figure (gcf) as a jpeg (extension specified in name)
+% % % saveas(gcf,FigName); %saves current figure (gcf) as a jpeg (extension specified in name)
 
 FigName=[filename 'DepolTime.eps'];
-saveas(gcf,FigName); %saves current figure (gcf) as a eps for Adobe Illustrator (extension specified in name)
+% % % saveas(gcf,FigName); %saves current figure (gcf) as a eps for Adobe Illustrator (extension specified in name)
 
 
 %Saving figures
 FigArrayName=[filename '.fig'];
-savefig(FigArray,FigArrayName,'compact');
+% % % savefig(FigArray,FigArrayName,'compact');
 
 
 w=w+1
