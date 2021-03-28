@@ -1,41 +1,51 @@
+clear all
+close all
 
-   
+% March 28 2021
+
+%This code was copy and pasted from HighkFall_NultiProteinDiffusion_2_ContShrink.
+%This is the version fo this code before making big changes to things like the tracking matrix
+
+%-File Name--------------------------------------------------------------
+mainfilename='One_Step'; %main file name (parameters added later)
+
+%-Lengths and Proteins To Run--------------------------------------------
 lengths=[20];
-concentrations=[5 20 100];
+proteins=[5 20 80];
 
+%-Rates------------------------------------------------------------------
+kLand=.091; %Chance of a single motor falling on filament. true kOn is kOn*NumberofFreeMotors*LengthofFilament
+kAssist=100; 
+kWalk=1; %Chance of a single motor walking on filament. true kWalk is kWalk*NumberofBoundMotors
+kFall=1000; %1; % Chance of a single protein falling off (not at end)
+kUnassisted=0; %200; % Chance filament will depolymerize without a protein at the end
 
-l=1;
-
-for l=1:size(lengths,2)
-
-w=1;
-
-for w=1:size(concentrations,2)
-    
-clearvars -except l w lengths concentrations
-
-
-%---Parameters-------------------------------------------------------------
+%-Other Parameters-------------------------------------------------------
 NumberofRuns=1000;
-
-StartingLength=lengths(l); %Number of monomers in filament initially
-ShrinkAmount=StartingLength-2; %How many monomers will fall off during simulation
-
-TotalProteins=concentrations(w); %Number of Proteins in system (stand-in for concentration)
-
-kOn=1; %Chance of a single motor falling on filament. true kOn is kOn*NumberofFreeMotors*LengthofFilament
-kAssist=8; 
-kWalk=40; %Chance of a single motor walking on filament. true kWalk is kWalk*NumberofBoundMotors
-kFall=0; %1; % Chance of a single protein falling off (not at end)
-kDepol=0; %200; % Chance filament will depolymerize without a protein at the end
-
+MinFilamentSize=2; %How small the filament will shrink to 
 BoundEffect=0; %0 if free proteins constant, 1 if free proteins change
 DirectEndBinding=0; %if DirectEndBinding=1, proteins can only land on end, if =0, they can land anywhere on filament
 
-parameters=join({'Initial Length=' num2str(StartingLength);'Total Proteins=' num2str(TotalProteins); 'Runs=' num2str(NumberofRuns); 'kOn=' num2str(kOn); 'kAssist=' num2str(kAssist); 'kWalk=' num2str(kWalk); 'kFall=' num2str(kFall); 'kDepol=' num2str(kDepol)});
 
-filename=['ContShrink_1s_'  num2str(DirectEndBinding) 'b_' num2str(kDepol) 'kD_' num2str(kFall) 'kF_'  num2str(BoundEffect) 'c_' num2str(kWalk) 'kW_' num2str(kAssist) 'kA_' num2str(kOn) 'kO_' num2str(NumberofRuns) 'r_L' num2str(StartingLength) '_P' num2str(TotalProteins)]; 
-% 1sided_endbinding_kFall_kDepol_boundeffect_kWalk_kOne_kAssist_numberofruns_startinglength_proteins
+
+l=1; %~~~Lengths Loop~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+for l=1:size(lengths,2)
+
+w=1; %~~~Proteins Loop~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+for w=1:size(proteins,2)
+    
+clearvars -except l w lengths concentrations
+
+%---Initializing Starting Length & Proteins--------------------------------
+StartingLength=lengths(l); %Number of monomers in filament initially
+TotalProteins=proteins(w); %Number of Proteins in system (stand-in for concentration)
+ShrinkAmount=StartingLength-MinFilamentSize; %How many monomers will fall off during simulation
+
+%---Setting Parameter Names------------------------------------------------
+parameters=join({'Initial Length=' num2str(StartingLength);'Total Proteins=' num2str(TotalProteins); 'Runs=' num2str(NumberofRuns); 'kOn=' num2str(kLand); 'kAssist=' num2str(kAssist); 'kWalk=' num2str(kWalk); 'kFall=' num2str(kFall); 'kDepol=' num2str(kUnassisted)});
+
+%---Setting File Name------------------------------------------------------
+filename=[mainfilename '_1s_'  num2str(DirectEndBinding) 'b_' num2str(kUnassisted) 'kD_' num2str(kFall) 'kF_'  num2str(BoundEffect) 'c_' num2str(kWalk) 'kW_' num2str(kAssist) 'kA_' num2str(kLand) 'kO_' num2str(NumberofRuns) 'r_L' num2str(StartingLength) '_P' num2str(TotalProteins)]; 
 filename=strrep(filename,'.','-'); %Replaces '.' in variables with '-' so it can be read
 
 %---Colors-----------------------------------------------------------------
@@ -44,14 +54,16 @@ filename=strrep(filename,'.','-'); %Replaces '.' in variables with '-' so it can
 TextboxColor=[1 1 1]; %[0.471 0.116 0.161];
 
 
-
 %---Tracking Matrices------------------------------------------------------
 NumberBoundCell=cell(NumberofRuns, 1);
 OutcomeCell=cell(NumberofRuns, 1);
 DTCell=cell(NumberofRuns, 1);
 ProteinTrackingCell=cell(NumberofRuns, 1);
-% 
-% 
+
+% kOnTrackingCell=cell(NumberofRuns, 1);
+% kWalkTrackingCell=cell(NumberofRuns, 1);
+% kAssistTrackingCell=cell(NumberofRuns, 1);
+
 TimeAtLength=zeros(NumberofRuns, ShrinkAmount); %Time Spent at each length
 TimeAtLengthCum=zeros(NumberofRuns, ShrinkAmount); %Time spent at each length, cumulative
 
@@ -66,7 +78,7 @@ CurrentLength=StartingLength;
 NumberofMonomers=CurrentLength+1;
 
 %---Motor Tracking Matrix
-ProteinTrackingMatrix=zeros(1,8);
+ProteinTrackingMatrix=zeros(1,10); 
 ProteinTrackingMatrix(1,1)=(1);
     %first column is the motor number
     %second is the time it landed
@@ -77,6 +89,7 @@ ProteinTrackingMatrix(1,1)=(1);
     %seventh is position # it depolled from (length of filament at that time)
     %eighth is time when it reached end
     %ninth is time when it depoled
+    %tenth=1 if the filament Depoled independently (instead of with assistance from a protein
     
 
         %The proteins are numbered as they land
@@ -100,47 +113,59 @@ OutcomeArray(1)=0; %Shows outcome (on, off, or walk) of each step of simulation
 
 FreeProteins(1)=TotalProteins;
 
+kOnTrackingArray=0;
+kWalkTrackingArray=0;
+kAssistTrackingArray=0;
+kFallTrackingArray=0;
+kDepolTrackingArray=0;
+
 
 while DepolEvents<ShrinkAmount
     
 j=j+1;
     
 OccupancyArray=OccupancyMatrix(end,:);
-    
+
     
 %---Setting Rates----------------------------------------------------------
 
-    if sum(ProteinTrackingMatrix(:,4)==NumberofMonomers)==0 %If there are no motors on end
-        k1=kOn*FreeProteins(j)*CurrentLength; %kOn times number of free motors times length of filament
-    else
-        k1=0;
-    end
-    
+    k1=kLand*FreeProteins(j)*CurrentLength; %kOn times number of free motors times length of filament
+   
     if sum(ProteinTrackingMatrix(:,4)==NumberofMonomers)>0
         k2=kAssist;
     else
         k2=0;
     end
     
-    if sum(ProteinTrackingMatrix(:,4))>0 && sum(ProteinTrackingMatrix(:,4)==NumberofMonomers)==0 % If there is a protein anywhere on the filament and there are no proteins on end
+    if sum(ProteinTrackingMatrix(:,4))>0  % If there is a protein anywhere on the filament
         k3=kWalk*sum(ProteinTrackingMatrix(:,4)>0); %kWalk * The number of bound motors
     else
         k3=0;
     end
     
-    if sum(ProteinTrackingMatrix(:,4))>0 && sum(ProteinTrackingMatrix(:,4)==NumberofMonomers)==0 % If there is a protein anywhere on the filament and there are no proteins on end
+    if sum(ProteinTrackingMatrix(:,4))>0 % If there is a protein anywhere on the filament 
         k4=kFall*sum(ProteinTrackingMatrix(:,4)>0); %kFall * The number of bound motors
     else
         k4=0;
     end
     
-    if sum(ProteinTrackingMatrix(:,4)==NumberofMonomers)==0 %If there are no motors on end
-        k5=kDepol;
-    else
-        k5=0;
-    end
+    
+    k5=kUnassisted;
+   
     
     kTotal=k1+k2+k3+k4+k5;
+    
+    
+    
+kOnTrackingArray(j)=k1;
+kWalkTrackingArray(j)=k3;
+kAssistTrackingArray(j)=k2;
+kFallTrackingArray=k4;
+kDepolTrackingArray=k5;    
+
+    
+
+    
     
 %---Outcomes (Land, Walk, Assist, Fall, Depol)---------------------------------------------
     
@@ -198,6 +223,10 @@ OccupancyArray=OccupancyMatrix(end,:);
             
             Outcome=2;
             
+            kOnTrackingMatrix(DepolEvents,h)=mean(kOnTrackingArray);
+            kWalkTrackingMatrix(DepolEvents,h)=mean(kWalkTrackingArray);
+            kAssistTrackingMatrix(DepolEvents,h)=mean(kWalkTrackingArray);
+            
         else % WALK ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             if p>(k1+k2)/kTotal && p<(k1+k2+k3)/kTotal
                 
@@ -209,7 +238,11 @@ OccupancyArray=OccupancyMatrix(end,:);
                     if mod(WalkInteger,2)~=0 && ProteinTrackingMatrix(ProteinToWalk,4)~=1 %whether or not its even or odd
                         WalkDirection=-1;
                     else
-                        WalkDirection=1;
+                        if ProteinTrackingMatrix(ProteinToWalk,4)~=NumberofMonomers % If the protein is not on the end
+                            WalkDirection=1;
+                        else
+                            WalkDirection=-1; % If the protein is on the end, the walk direction is negative regardless of the value of p/q
+                        end % Is this okay? IF PROBLEM: look here, this sub-if loop was written quickly & sloppily
                     end
                     
                     
@@ -253,6 +286,13 @@ OccupancyArray=OccupancyMatrix(end,:);
                  
                  OccupancyArray(NumberofMonomers)=NaN; %the last monomer falls off (is no longer a spot to occupy)
                  
+                ProteinTrackingMatrix(ProteinTrackingMatrix(:,4)==NumberofMonomers,7)=NumberofMonomers; %The length of the filament at the time this protein reached the end
+                ProteinTrackingMatrix(ProteinTrackingMatrix(:,4)==NumberofMonomers,8)=sum(DT)-DT(j); % The total time of the simulation minus the current DT, not super useful in this case but kept just in case
+                ProteinTrackingMatrix(ProteinTrackingMatrix(:,4)==NumberofMonomers,9)=sum(DT); %The total time of sim after depol
+                ProteinTrackingMatrix(ProteinTrackingMatrix(:,4)==NumberofMonomers,10)=1; % set to 1 to indicate that the filament depolled independently and not because of the protein
+                ProteinTrackingMatrix(ProteinTrackingMatrix(:,4)==NumberofMonomers,4)=0; %Resets position of protein to 0 --> Proteins don't rejoin pool & just stay 0 since others are available
+            
+                 
                  CurrentLength=CurrentLength-1;
                  NumberofMonomers=NumberofMonomers-1;
 
@@ -293,13 +333,17 @@ end
 
 
 
+kOnTrackingAvg=mean(kOnTrackingMatrix,2);
+kWalkTrackingAvg=mean(kWalkTrackingMatrix,2);
+kAssistTrackingAvg=mean(kAssistTrackingMatrix,2);
+
 
 
 
 avgCumTime=[0 mean(TimeAtLengthCum)]; %avg cumulative time of the sim after each depol event
 avgStepTime=[1./mean(TimeAtLength)]; %avg depol rate at each depol event
 
-DataToTrack=[BoundEffect DirectEndBinding kFall kDepol kWalk kOn kAssist NumberofRuns StartingLength TotalProteins size(avgStepTime,2) size(avgCumTime,2) avgStepTime avgCumTime];
+DataToTrack=[BoundEffect DirectEndBinding kFall kUnassisted kWalk kLand kAssist NumberofRuns StartingLength TotalProteins size(avgStepTime,2) size(avgCumTime,2) avgStepTime avgCumTime];
 
 matfile=[filename '.mat'];
 save(matfile); %saves all the workspace values (cells, matrices, etc) from this run
@@ -308,7 +352,6 @@ textfile=[filename '.txt']; %saves array variables that can easily be read from 
 fileID3 = fopen(textfile,'a'); 
 fprintf(fileID3,'%12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f\r\n',DataToTrack'); %Don't know why this was chosen
 fclose(fileID3);
-
 
 
 
@@ -334,7 +377,7 @@ else
 end 
 
 
-if kDepol==0
+if kUnassisted==0
     figdescription{5}=['Filament: Depolymerizes Only When Protein Is On End'];
 else
     figdescription{5}=['Filament: Depolymerizes Independently Or When Protein Is On End'];
@@ -421,6 +464,10 @@ hold off
 FigName=[filename 'LengthTime.jpg'];
 saveas(gcf,FigName); %saves current figure (gcf) as a jpeg (extension specified in name)
 
+FigName=[filename 'LengthTime.eps'];
+saveas(gcf,FigName); %saves current figure (gcf) as a eps for Adobe Illustrator (extension specified in name)
+
+
 
 FigArray(2)=figure;
 
@@ -451,11 +498,13 @@ pavg.LineWidth=6;
 
 %---Setting figure properties
 
-set(gca, 'XDir','reverse'); %so x is shown shrinking instead of growing
 set(gca, 'OuterPosition', [0.05,.27,1,.73]); % graph starts 0 away from left edge, 20% away from bottom edge, takes up 100% space from left-to-right, & 85% space up-to-down (100%-15%)
 set(gca, 'fontsize',14);
 
 set(gca, 'XLim',[min(x),max(x)]); %graph for some reason showing one blank data point at beginning (x=LengthofFilament), this fixes that (max(xavg)=LengthofFilament-1)
+
+set(gca, 'XDir','reverse'); %so x is shown shrinking instead of growing, must be under setting XLim
+
 
 %---Setting Titles
 title('Time Until Depolymerization At L=x to L=x-1');
@@ -506,6 +555,8 @@ hold off
 FigName=[filename 'DepolTime.jpg'];
 saveas(gcf,FigName); %saves current figure (gcf) as a jpeg (extension specified in name)
 
+FigName=[filename 'DepolTime.eps'];
+saveas(gcf,FigName); %saves current figure (gcf) as a eps for Adobe Illustrator (extension specified in name)
 
 
 %Saving figures
@@ -518,3 +569,9 @@ end
 
 l=l+1
 end
+
+
+% textfile2=[filename 'AvgRates.txt'] %saves the avg rate data
+% fileID3 = fopen(textfile2,'a');
+% fprintf(fileID3,'%12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f\r\n',DataToTrack'); %Don't know why this was chosen
+% fclose(fileID3);
