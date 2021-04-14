@@ -63,34 +63,25 @@ TextboxColor=[1 1 1]; %[0.471 0.116 0.161];
 
 
 %---Tracking Matrices------------------------------------------------------
-% % % NumberBoundCell=cell(NumberofRuns, 1);
-% % % OutcomeCell=cell(NumberofRuns, 1);
-% % % DTCell=cell(NumberofRuns, 1);
-% % % ProteinTrackingCell=cell(NumberofRuns, 1);
-
-% kOnTrackingCell=cell(NumberofRuns, 1);
-% kWalkTrackingCell=cell(NumberofRuns, 1);
-% kAssistTrackingCell=cell(NumberofRuns, 1);
-
-
-
-
-
 
 TimeAtLength=zeros(NumberofRuns, ShrinkAmount); %Time Spent at each length
 TimeAtLengthCum=zeros(NumberofRuns, ShrinkAmount); %Time spent at each length, cumulative
 
 
+%~~~RUN LOOP~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        %(each run is one filament depolymerizing fully)
+        
 for h=1:NumberofRuns
  
      
-%---INITIALIZING Values (Reset after each depolymerizing event)
+%~~~INITIALIZING VALUES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        %(That Reset after each depolymerizing event)
 
-%---Length
+%---Length-----
 CurrentLength=StartingLength;  
 NumberofMonomers=CurrentLength+1;
 
-%---Motor Tracking Matrix
+%---Motor Tracking Matrix-----
 ProteinTrackingMatrix=zeros(1,13); 
 ProteinTrackingMatrix(1,1)=(1);
     % 1: motor number
@@ -108,11 +99,13 @@ ProteinTrackingMatrix(1,1)=(1);
     % 12: Did the protein assist the depolymerization (1=yes, 0=no)
     % 13: How long did the protein spend on the end?
   
-                 
+%---Occupancy Matrix-----                 
 OccupancyMatrix=zeros(1,NumberofMonomers); % Shows how many proteins are on each monomer at a given time
     %Each column is a different monomer
     %Each row is a different step
-    
+OccupancyArray=zeros(1,NumberofMonomers);
+
+%---Outcome Matrix-----    
 OutcomeMatrix=zeros(1,12); %Shows outcome (on, off, or walk) of each step of simulation
     %Each column is a different data point
         % 1: Step Number
@@ -129,86 +122,81 @@ OutcomeMatrix=zeros(1,12); %Shows outcome (on, off, or walk) of each step of sim
         % 12: True kUnassisted (same as kUnassisted)
     %Each row is a different step
 
-
-
-ProteinsLanded=0;
-DepolEvents=0;
-
+%---Time, Steps, Depol Events-----
 DT=0;
 j=0; % Way of tracking number of runs through while loop
+DepolEvents=0; % How many times has this filament depolled
 
+%---Landed, Bound, and Free Proteins-----
+ProteinsLanded=0; % How many Proteins have landed so far
 BoundProteins(1)=0; %Shows how many proteins bound at each step
-
-
-
 FreeProteins(1)=TotalProteins;
 
 
-
-
-OccupancyArray=zeros(1,NumberofMonomers);
-
-
+%~~~DEPOLYMERIZATION LOOP~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        %(Each run through loop is one depol event)
+        
 while DepolEvents<ShrinkAmount
     
-    
+%---Counting While Loop-----   
 j=j+1;
-    
+
+%---Initializing Arrays-----    
 OccupancyArray=OccupancyMatrix(end,:); %gets the last value of the occupancy array... is this necessary?
 OutcomeArray=zeros(1,12); % resets the outcome array to 0
 
+   
+%~~~SETTING RATES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    
-%---Setting Rates----------------------------------------------------------
-
+ %-- k1 (kLand)
     if DirectEndBinding==1
         k1=kLand*FreeProteins(j)*1;
     else
         k1=kLand*FreeProteins(j)*CurrentLength; %kOn times number of free motors times length of filament
     end
-    
+ %-- k2 (kAssist)    
     if sum(ProteinTrackingMatrix(:,6)==NumberofMonomers)>0
         k2=kAssist;
     else
         k2=0;
     end
-    
+ %-- k3 (kWalk)    
     if sum(ProteinTrackingMatrix(:,6))>0  % If there is a protein anywhere on the filament
         k3=kWalk*sum(ProteinTrackingMatrix(:,6)>0); %kWalk * The number of bound motors
     else
         k3=0;
     end
-    
+ %-- k4 (kFall)    
     if sum(ProteinTrackingMatrix(:,6))>0 % If there is a protein anywhere on the filament 
         k4=kFall*sum(ProteinTrackingMatrix(:,6)>0); %kFall * The number of bound motors
     else
         k4=0;
     end
     
-    
+ %-- k5 (kUnassisted)   
     k5=kUnassisted;
     
-    
+ %-- kTotal  
     kTotal=k1+k2+k3+k4+k5;
     
-    %---Outcome Array---
-    OutcomeArray(8)=k1;
-    OutcomeArray(9)=k2;
-    OutcomeArray(10)=k3;
-    OutcomeArray(11)=k4;
-    OutcomeArray(12)=k5;
-     
+%---Outcome Array---
+    OutcomeArray(8)=k1; %Tracks k1
+    OutcomeArray(9)=k2; %Tracks k2
+    OutcomeArray(10)=k3; %Tracks k3
+    OutcomeArray(11)=k4; %Tracks k4
+    OutcomeArray(12)=k5; %Tracks k5
+       
     
-    
-    
-%---Outcomes (Land, Walk, Assist, Fall, Depol)---------------------------------------------
-    
-    p=rand;
-    DT(j)=exprnd(1/kTotal);
+%~~~OUTCOMES~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        % Determines what simulation does based on randomly generated number
+
+%---Generate Random Numbers-----        
+    p=rand; % Determines Outcome
+    DT(j)=exprnd(1/kTotal); % Determines Time of Step
    
-    if p<k1/kTotal % LAND ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        
-        
+%---LAND (k1)-----    
+    if p<k1/kTotal
+          
         if DirectEndBinding==1 % This value is determined at top of code. If DirectEndBinding=1, proteins can only land on end. If =0, they can land anywhere on the filament.
             LandPosition=NumberofMonomers;
         else
@@ -255,7 +243,8 @@ OutcomeArray=zeros(1,12); % resets the outcome array to 0
         
         Outcome=1;
         
-    else % ASSIST ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%---ASSIST (k2)-----    
+    else 
         if p>k1/kTotal && p<(k1+k2)/kTotal
             
             
@@ -294,7 +283,8 @@ OutcomeArray=zeros(1,12); % resets the outcome array to 0
 % % %             kWalkTrackingMatrix(DepolEvents,h)=mean(kWalkTrackingArray);
 % % %             kAssistTrackingMatrix(DepolEvents,h)=mean(kWalkTrackingArray);
             
-        else % WALK ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%---WALK (k3)-----
+        else 
             if p>(k1+k2)/kTotal && p<(k1+k2+k3)/kTotal
                 
                 BoundProteinArray=find(ProteinTrackingMatrix(:,6)~=0);
@@ -365,8 +355,8 @@ OutcomeArray=zeros(1,12); % resets the outcome array to 0
                 
                 FreeProteins(j+1)=FreeProteins(j);
                 
-                
-            else % FALL ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%---FALL (k4)-----                
+            else
                 
              if p>(k1+k2+k3)/kTotal && p<(k1+k2+k3+k4)/kTotal
                 BoundProteinArray=find(ProteinTrackingMatrix(:,6)~=0);
@@ -399,8 +389,10 @@ OutcomeArray=zeros(1,12); % resets the outcome array to 0
                 FreeProteins(j+1)=FreeProteins(j)+1*BoundEffect;
                 
                 Outcome=4;
+              
                 
-             else % DEPOL ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+%---DEPOL (k5)-----                
+             else
                  
                  DepolEvents=DepolEvents+1; %How many times the filament has depolymerized during this run
            
