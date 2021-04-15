@@ -197,28 +197,18 @@ OutcomeArray=zeros(1,12); % resets the outcome array to 0
 %---LAND (k1)-----    
     if p<k1/kTotal
           
-        if DirectEndBinding==1 % This value is determined at top of code. If DirectEndBinding=1, proteins can only land on end. If =0, they can land anywhere on the filament.
+        if DirectEndBinding==1 % If DirectEndBinding=1, proteins can only land on end. If =0, they can land anywhere on the filament.
             LandPosition=NumberofMonomers;
         else
             LandPosition=ceil(p/(k1/kTotal)*NumberofMonomers); %Which position "bin" the number falls into
         end
         
+        %---Tracking Free and Landed Proteins
         ProteinsLanded=ProteinsLanded+1;
         FreeProteins(j+1)=max(FreeProteins(j)-1*BoundEffect,0);
         
-% % %         ProteinTrackingMatrix(ProteinsLanded,1)=ProteinsLanded;
-% % %         ProteinTrackingMatrix(ProteinsLanded,2)=sum(DT); %Time Landed
-% % %         ProteinTrackingMatrix(ProteinsLanded,3)=LandPosition; %Position Landed
-% % %         ProteinTrackingMatrix(ProteinsLanded,4)=LandPosition; %Current Position
-% % %         ProteinTrackingMatrix(ProteinsLanded,5)=0; %Position it fell off from
-% % %         ProteinTrackingMatrix(ProteinsLanded,6)=0; %Time when Fell Off
-% % %         ProteinTrackingMatrix(ProteinsLanded,7)=0;%Position it depolled from (length at that time)
-% % %         ProteinTrackingMatrix(ProteinsLanded,8)=0; %Time when reached end
-% % %         ProteinTrackingMatrix(ProteinsLanded,9)=0; %Time after depol
-        
-        
-        %---New Stuff-----------------
-        
+
+        %---Protein Tracking Matrix------
         ProteinTrackingMatrix(ProteinsLanded,1)=ProteinsLanded; % Gives the protein a number based on the order it fell
         ProteinTrackingMatrix(ProteinsLanded,2)=j; % Step of simulation
         ProteinTrackingMatrix(ProteinsLanded,3)=sum(DT); % Time of simulation
@@ -231,38 +221,33 @@ OutcomeArray=zeros(1,12); % resets the outcome array to 0
         ProteinTrackingMatrix(ProteinsLanded,10)=0; % Position protein disassociates from
         ProteinTrackingMatrix(ProteinsLanded,11)=0; % Length of the filament when the protein disassociates
         ProteinTrackingMatrix(ProteinsLanded,12)=0; % Turns to 1 if the protein assists the filament to depolymerize (0 if depols independently)
-        ProteinTrackingMatrix(ProteinsLanded,13)=0; % Time the protein spends on the end 
+        ProteinTrackingMatrix(ProteinsLanded,13)=0; % Time the protein spends on the en
+        %--------------------------------
         
-        %------------------------------
-        
-        
-        
-        
-        
+        %---Occupancy Array--------------
         OccupancyArray(LandPosition)=OccupancyArray(LandPosition)+1;
+        %--------------------------------
         
+        %---Outcome----------------------
         Outcome=1;
+        %--------------------------------
         
 %---ASSIST (k2)-----    
     else 
         if p>k1/kTotal && p<(k1+k2)/kTotal
             
-            
+            %---Depol Events-----
             DepolEvents=DepolEvents+1;
           
-            
+            %---TIME AT LENGTH ARRAY-----
             TimeAtLength(h,DepolEvents)=sum(DT)-sum(TimeAtLength(h,:)); %Time sim spent at this length
             TimeAtLengthCum(h,DepolEvents)=sum(DT); %Time this run of simulation takes before this depol event
             
+            %---Free Proteins-----
             FreeProteins(j+1)=FreeProteins(j)+OccupancyArray(NumberofMonomers)*BoundEffect;
        
-% % %             ProteinTrackingMatrix(ProteinTrackingMatrix(:,4)==NumberofMonomers,7)=NumberofMonomers; %The length of the filament at the time this protein reached the end
-% % %             ProteinTrackingMatrix(ProteinTrackingMatrix(:,4)==NumberofMonomers,8)=sum(DT)-DT(j); % The total time of the simulation minus the current DT
-% % %             ProteinTrackingMatrix(ProteinTrackingMatrix(:,4)==NumberofMonomers,9)=sum(DT); %The total time of sim after depol
-% % %             ProteinTrackingMatrix(ProteinTrackingMatrix(:,4)==NumberofMonomers,4)=0; %Resets position of protein to 0 --> Proteins don't rejoin pool & just stay 0 since others are available
-% % %             
-            
-            %---New Stuff-----------------
+  
+            %---Protein Tracking Matrix------
             ProteinTrackingMatrix(ProteinTrackingMatrix(:,6)==NumberofMonomers,8)=j; % Step of simulation when protein disassociates
             ProteinTrackingMatrix(ProteinTrackingMatrix(:,6)==NumberofMonomers,9)=sum(DT); % The time of the simulation after depol event
             ProteinTrackingMatrix(ProteinTrackingMatrix(:,6)==NumberofMonomers,10)=NumberofMonomers; % Position of protein when it fell
@@ -270,23 +255,27 @@ OutcomeArray=zeros(1,12); % resets the outcome array to 0
             ProteinTrackingMatrix(ProteinTrackingMatrix(:,6)==NumberofMonomers,12)=0; % Did it assist? %%%%% Work on this later
             ProteinTrackingMatrix(ProteinTrackingMatrix(:,6)==NumberofMonomers,13)= sum(DT)-ProteinTrackingMatrix(ProteinTrackingMatrix(:,6)==NumberofMonomers,13); %%%% Work On This Later % Amount of time protein on end (current time minus time arrived on end)
             ProteinTrackingMatrix(ProteinTrackingMatrix(:,6)==NumberofMonomers,6)=0; % Resets protein position to 0
-                       
+            %--------------------------------           
             
+            %---Occupancy Array--------------
             OccupancyArray(NumberofMonomers:end)=NaN;
+            %--------------------------------           
             
+            %---Outcome----------------------
+            Outcome=2;
+            %--------------------------------
+            
+            %---DECREASING LENGTH-----
             CurrentLength=CurrentLength-1;
             NumberofMonomers=NumberofMonomers-1;
             
-            Outcome=2;
-            
-% % %             kOnTrackingMatrix(DepolEvents,h)=mean(kOnTrackingArray);
-% % %             kWalkTrackingMatrix(DepolEvents,h)=mean(kWalkTrackingArray);
-% % %             kAssistTrackingMatrix(DepolEvents,h)=mean(kWalkTrackingArray);
             
 %---WALK (k3)-----
         else 
             if p>(k1+k2)/kTotal && p<(k1+k2+k3)/kTotal
                 
+                
+                %---Finding Walk Protein and Direction-----
                 BoundProteinArray=find(ProteinTrackingMatrix(:,6)~=0);
                 q=p-(k1+k2)/kTotal; %This is how far p is away from the edge of the "walk bin"
                 WalkInteger=ceil(q/((k3/kTotal)/(size(BoundProteinArray,1)*2)));
@@ -302,10 +291,10 @@ OutcomeArray=zeros(1,12); % resets the outcome array to 0
                         end % Is this okay? IF PROBLEM: look here, this sub-if loop was written quickly & sloppily
                     end
                     
-                %---New Stuff-----
                 
                 %---Is/Was Protein On End?---
-                % (1,0)= is now on end (0,1)= was on end but walked off (0,0)= is not on end, was not on end
+                    % (1,0)= is now on end (0,1)= was on end but walked off (0,0)= is not on end, was not on end
+                    % This is so you can get a proper "time on end" measurement
                 if ProteinTrackingMatrix(ProteinToWalk,6)+WalkDirection==NumberofMonomers %If the protein IS on the end after walking
                    ProteinNearEnd(1,1)=1;
                 else
@@ -316,101 +305,90 @@ OutcomeArray=zeros(1,12); % resets the outcome array to 0
                 else
                     ProteinNearEnd(1,2)=0;
                 end
+                %---------------------------
 
     
-                %---Outcome Array---
+                %---Outcome----------------------
                 OutcomeArray(6)=ProteinToWalk; % tracks which protein walked during this step
                 OutcomeArray(7)=WalkDirection; % shows which way the protein walked
+                %--------------------------------
                     
-                %---Occupancy Array---
+                %---Occupancy Array--------------
                 OccupancyArray(ProteinTrackingMatrix(ProteinToWalk,6))=OccupancyArray(ProteinTrackingMatrix(ProteinToWalk,6))-1; %Removes protein from its original position
-
                 OccupancyArray(ProteinTrackingMatrix(ProteinToWalk,6)+WalkDirection)=OccupancyArray(ProteinTrackingMatrix(ProteinToWalk,6)+WalkDirection)+1; %Adds  protein to new position
+                %--------------------------------
                 
-                %---Protein Tracking Matrix---
-                
+                %---Protein Tracking Matrix------
                 ProteinTrackingMatrix(ProteinToWalk,6)=ProteinTrackingMatrix(ProteinToWalk,6)+WalkDirection; %Current Position either forward or back
-                ProteinTrackingMatrix(ProteinToWalk,7)=ProteinTrackingMatrix(ProteinToWalk,7)+1; % Total time protein has walked
-
+                ProteinTrackingMatrix(ProteinToWalk,7)=ProteinTrackingMatrix(ProteinToWalk,7)+1; % Total times protein has walked
+                %--------------------------------
                 
-                
+                %---Time Protein Spent on End----
+                %Sums the total time a protein was on the end of the filament before a depol event occurs
                 if ProteinNearEnd(1,2)==1 %If this protein was on the end, but walked off
                     ProteinTrackingMatrix(ProteinToWalk,13)=0; %How long protein on end tracker resets to 0
                 end
                 if ProteinNearEnd(1,2)==1 %If this protein is now on the end
                     ProteinTrackingMatrix(ProteinToWalk,13)=sum(DT); %starts keeping track of how long the protein was on the end
                 end
+                %--------------------------------                
                 
-                
-                
-                
-% % %                 ProteinTrackingMatrix(ProteinToWalk,4)=ProteinTrackingMatrix(ProteinToWalk,4)+WalkDirection; %Current Position either forward or back
- 
-                
- 
-                
+                %---Outcome----------------------
                 Outcome=3;
+                %--------------------------------
                 
-% % %                 OccupancyArray(ProteinTrackingMatrix(ProteinToWalk,4))=OccupancyArray(ProteinTrackingMatrix(ProteinToWalk,4))+1; %Adds protein to its new position
-                
+                %---Free Proteins-----
                 FreeProteins(j+1)=FreeProteins(j);
                 
 %---FALL (k4)-----                
             else
                 
              if p>(k1+k2+k3)/kTotal && p<(k1+k2+k3+k4)/kTotal
+                 
+                %---Finding Protein To Fall-----
                 BoundProteinArray=find(ProteinTrackingMatrix(:,6)~=0);
                 q=p-(k1+k2+k3)/kTotal; %This is how far p is away from the edge of the "fall bin"
                 FallInteger=ceil(q/((k4/kTotal)/size(BoundProteinArray,1)));
                 ProteinToFall=BoundProteinArray(FallInteger);
-                
+
+                %---Occupancy Array--------------                
                 OccupancyArray(ProteinTrackingMatrix(ProteinToFall,6))=OccupancyArray(ProteinTrackingMatrix(ProteinToFall,6))-1; %Removes protein from position it falls from
-                
-                
-% % %                 ProteinTrackingMatrix(ProteinToFall,5)=ProteinTrackingMatrix(ProteinToFall,4); %Position protein was in when it fell off
-% % %                 ProteinTrackingMatrix(ProteinToFall,4)=0;
-% % %                 ProteinTrackingMatrix(ProteinToFall,6)=sum(DT); %Time when protein fell off (including time taken to fall)
-                
-                %---New Stuff---
-                
+                %--------------------------------
+
+                %---Protein Tracking Matrix------
                 ProteinTrackingMatrix(ProteinToFall,8)=j; % Step of simulation when protein fell
                 ProteinTrackingMatrix(ProteinToFall,9)=sum(DT); % Time of simulation when protein fell
                 ProteinTrackingMatrix(ProteinToFall,10)=ProteinTrackingMatrix(ProteinToFall,6); % Position Protein fell from
                 ProteinTrackingMatrix(ProteinToFall,11)=NumberofMonomers; % Length of filament when protein fell
 % % %                 ProteinTrackingMatrix(ProteinToFall,13)= % WORK ON THIS LATER
                 ProteinTrackingMatrix(ProteinToFall,6)=0; % Current Position resets to 0
-                
-                
-                
-                
-                
-                
-                
+                %--------------------------------                
+     
+                %---Free Proteins-----
                 FreeProteins(j+1)=FreeProteins(j)+1*BoundEffect;
                 
+                %---Outcome----------------------
                 Outcome=4;
-              
+                %--------------------------------   
                 
 %---DEPOL (k5)-----                
              else
                  
+                 %---Depol Events-----
                  DepolEvents=DepolEvents+1; %How many times the filament has depolymerized during this run
            
+                 %---TIME AT LENGTH ARRAY-----
                  TimeAtLength(h,DepolEvents)=sum(DT)-sum(TimeAtLength(h,:)); %Time sim spent at this length
                  TimeAtLengthCum(h,DepolEvents)=sum(DT); %Time this run of simulation takes before this depol event
-                              
+                  
+                 %---Free Proteins-----
                  FreeProteins(j+1)=FreeProteins(j)+OccupancyArray(NumberofMonomers)*BoundEffect; % The number of free proteins increases by amount of proteins on end monomer. This hsould always be zero, but added just in case.
                  
+                 %---Occupancy Array--------------   
                  OccupancyArray(NumberofMonomers)=NaN; %the last monomer falls off (is no longer a spot to occupy)
-% % %                  
-% % %                 ProteinTrackingMatrix(ProteinTrackingMatrix(:,4)==NumberofMonomers,7)=NumberofMonomers; %The length of the filament at the time this protein reached the end
-% % %                 ProteinTrackingMatrix(ProteinTrackingMatrix(:,4)==NumberofMonomers,8)=sum(DT)-DT(j); % The total time of the simulation minus the current DT, not super useful in this case but kept just in case
-% % %                 ProteinTrackingMatrix(ProteinTrackingMatrix(:,4)==NumberofMonomers,9)=sum(DT); %The total time of sim after depol
-% % %                 ProteinTrackingMatrix(ProteinTrackingMatrix(:,4)==NumberofMonomers,10)=1; % set to 1 to indicate that the filament depolled independently and not because of the protein
-% % %                 ProteinTrackingMatrix(ProteinTrackingMatrix(:,4)==NumberofMonomers,4)=0; %Resets position of protein to 0 --> Proteins don't rejoin pool & just stay 0 since others are available
-% % %             
-                %---New Stuff---
-                
+                 %--------------------------------         
+
+                %---Protein Tracking Matrix-------
                 ProteinTrackingMatrix(ProteinTrackingMatrix(:,6)==NumberofMonomers,8)=j; % Step when filament depolymerized
                 ProteinTrackingMatrix(ProteinTrackingMatrix(:,6)==NumberofMonomers,9)=sum(DT); % Simulation time when filament depolled
                 ProteinTrackingMatrix(ProteinTrackingMatrix(:,6)==NumberofMonomers,10)=NumberofMonomers; % Length of filament BEFORE depolymerization (protein position)
@@ -418,71 +396,56 @@ OutcomeArray=zeros(1,12); % resets the outcome array to 0
  % % %                 ProteinTrackingMatrix(ProteinTrackingMatrix(:,6)==NumberofMonomers,12)=0; % Filament depolled independently %%% WORK ON THIS LATER
                 ProteinTrackingMatrix(ProteinTrackingMatrix(:,6)==NumberofMonomers,13)= sum(DT)-ProteinTrackingMatrix(ProteinTrackingMatrix(:,6)==NumberofMonomers,13); %%%WORK ON THIS LATER % Amount of time protein on end (current time minus time arrived on end)
                 ProteinTrackingMatrix(ProteinTrackingMatrix(:,6)==NumberofMonomers,6)= 0; % Resets position of all proteins on end to 0    
-
+                %--------------------------------  
                 
-                
-                
+                %---DECREASING LENGTH-----
                  CurrentLength=CurrentLength-1;
                  NumberofMonomers=NumberofMonomers-1;
 
-
+                 %---Outcome----------------------
                  Outcome=5;
-             end
-                
+                 %--------------------------------      
+                 
+             end 
             end
         end
     end
     
-    
-%---Outcome Array----------------------------------------------------------
+%~~~END OF STEP DATA~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
+%---OUTCOME ARRAY----------------------------------------------------------
 OutcomeArray(1)=j; % Step number
 OutcomeArray(2)=sum(DT); %time at step
 OutcomeArray(3)= CurrentLength;
 OutcomeArray(4)=size(ProteinTrackingMatrix(ProteinTrackingMatrix(:,6)>0),1); %copy and pasted from previous BoundProteins definition, changed 4 to 6
 OutcomeArray(5)=Outcome; 
 
-    
-    
-%%% BoundProteins(j+1)=size(ProteinTrackingMatrix(ProteinTrackingMatrix(:,6)>0),1); %Tracks how many proteins are bound to the filament during this step
-% % % OutcomeMatrix(j+1)=Outcome; %Tracks what the outcome is this step
+%--MATRICES (Occupancy and Outcome)-----
 OccupancyMatrix=[OccupancyMatrix;OccupancyArray];
-OutcomeMatrix(j,:)=OutcomeArray;
+OutcomeMatrix(j,:)=OutcomeArray;    
 
-
-
-
-%     Outcome
-%     DT(j)
-%     sum(DT)
-%     ProteinTrackingMatrix
-%     OccupancyArray
-%     FreeProteins(j+1)
-%     BoundProteins(j+1)
-
-% % % OutcomeArray
-% % % OccupancyArray
-% % % ProteinTrackingMatrix
-
-% OccupancyMatrix
-% OccupancyArray
-% OutcomeMatrix
+%---Bound Proteins-----
+BoundProteins(j+1)=size(ProteinTrackingMatrix(ProteinTrackingMatrix(:,6)>0),1); %Tracks how many proteins are bound to the filament during this step
 
 end
+
+%~~~END OF RUN DATA~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 %---Tracking/Storing Data in Cells-----------------------------------------
+%---Number Bound-----
 NumberBoundCell{h,1}=BoundProteins;
+%---DT (Step Time)-----
 DTCell{h,1}=DT;
-
+%---Outcome-----
 OutcomeCell{l,w,h}=OutcomeMatrix;
+%---Protein Tracking-----
 ProteinTrackingCell{l,w,h}=ProteinTrackingMatrix;
+%---Occupancy-----
 OccupancyCell{l,w,h}=OccupancyMatrix;
-
 
 end
 
-
-
-
+%~~~END OF ALL RUNS FOR LENGTH/PROTEIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 avgCumTime=[0 mean(TimeAtLengthCum)]; %avg cumulative time of the sim after each depol event
 avgStepTime=[1./mean(TimeAtLength)]; %avg depol rate at each depol event
