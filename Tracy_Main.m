@@ -442,6 +442,8 @@ OutcomeCell{l,w,h}=OutcomeMatrix;
 ProteinTrackingCell{l,w,h}=ProteinTrackingMatrix;
 %---Occupancy-----
 OccupancyCell{l,w,h}=OccupancyMatrix;
+%---Time For Depol Event (Cumulative)-----
+CumTimeCell{l,w,h}=[0 TimeAtLengthCum(h,:)];
 
 end
 
@@ -449,20 +451,17 @@ end
 
 avgCumTime=[0 mean(TimeAtLengthCum)]; %avg cumulative time of the sim after each depol event
 avgStepTime=[1./mean(TimeAtLength)]; %avg depol rate at each depol event
+avgCumTimeCell{l,w}=avgCumTime;
 
-DataToTrack=[BoundEffect DirectEndBinding kFall kUnassisted kWalk kLand kAssist NumberofRuns StartingLength TotalProteins size(avgStepTime,2) size(avgCumTime,2) avgStepTime avgCumTime];
-
-% % % matfile=[filename '.mat'];
-% % % save(matfile); %saves all the workspace values (cells, matrices, etc) from this run
-% % % 
-% % % textfile=[filename '.txt']; %saves array variables that can easily be read from a .txt file in a reader code
-% % % fileID3 = fopen(textfile,'a'); 
-% % % fprintf(fileID3,'%12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f %12.8f\r\n',DataToTrack'); %Don't know why this was chosen
-% % % fclose(fileID3);
+%~~~SAVING MATLAB DATA~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        %Saves new file for each combination of protein concentration and length
+        
+matfile=[filename '.mat'];
+save(matfile); %saves all the workspace values (cells, matrices, etc) from this run
 
 
 
-%one sided, direct end binding, falling?, depolling on own?, concentration?
+%---FIGURE DESCRIPTION-----------------------------------------------------
 
 figdescription{1}=['DESCRIPTION'];
 figdescription{2}=['One-Sided Depolymerization'];
@@ -491,188 +490,7 @@ else
     
 end 
 
-
-
-
-
-
-FigArray(1)=figure;
-
-%---Length Versus Total Time Plot------------------------------------------
-
-%---Plotting Every Run
-for h=1:NumberofRuns
-    
-    y=StartingLength-(0:ShrinkAmount);
-    x=[0 TimeAtLengthCum(h,:)]; %Total time of sim after each step for every run (h)
-    
-    p=plot(x,y);
-    
-    hold on
-    
-end
-
-set(p, 'visible', 'off') %%%%%%%%%%%%%
-
-%---Plotting avg of all runs
-
-%Setting xavg (avg total time taken to get to length y)
-avgCumTime=[0 mean(TimeAtLengthCum)];
-
-
-avgCumTimeCell{l,w}=[0 mean(TimeAtLengthCum)];
-
-pavg=plot(avgCumTime,y, '-dw');
-pavg.LineWidth=6;
-
-%---Setting Titles
-xlabel('Total Time Elapsed (in units time)');
-ylabel('Length of Filament (in Monomers)');
-title('Total Time For Filament To Depolymerize From L to L-x');
-
-%---Setting Figure Properties 
-
-set(gca, 'Units', 'normalized');
-set(gca, 'OuterPosition', [0,.27,1,.73]); %  graph starts 0 away from left edge, 20% away from bottom edge, takes up 100% space from left-to-right, & 85% space up-to-down (100%-15%)
-
-
-set(gca, 'fontsize',12);
-set(gca, 'YLim',[min(y),max(y)]); %graph for some reason showing one blank data point at bottom, this fixes that (max(xavg)=LengthofFilament-1)
-
-
-
-%---Paremter Textbox
-ParTextbox=annotation('textbox', [0.6, 0.8, 0.1, 0.1], 'String', parameters, 'FitBoxToText','on'); %text box horizontally offset (from left) 70% of figure's width & vertically offset (from bottom) 80%. Box fits around text. Default Height is 10% of height x 10% width
-ParTextbox.FontSize=12;
-ParTextbox.FontName='FixedWidth'; % To match data figure 2
-ParTextbox.BackgroundColor=TextboxColor;
-ParTextbox.FaceAlpha=.7; %Transparency of textbox background
-%---FigDescription Textbox
-DesTextbox=annotation('textbox', [0.05, 0.15, 0.1, 0.1], 'String', figdescription, 'FitBoxToText','on'); %text box horizontally offset (from left) 70% of figure's width & vertically offset (from bottom) 80%. Box fits around text. Default Height is 10% of height x 10% width
-DesTextbox.FontSize=12;
-
-
-% %---Data Textbox
-% 
-% %Displaying only 2 decimal places
-% for h=1:size(avgCumTime,2)
-% xavgString{1,h}=sprintf('%.2f',avgCumTime(h))
-% end
-% xavgString=join(xavgString); %makes it cell that can be combined with the labels
-% 
-% avgVal=['Average (Total) Time Until Each Depol Event = ' xavgString]
-% 
-% DataTextbox=annotation('textbox', [0.05, 0, 0.15, 0.15], 'String', avgVal, 'FitBoxToText','on'); %text box horizontally offset (from left) 15% of figure's width & vertically offset (from bottom) 0%. Box fits around text. Default Height is 10% of height x 10% width
-% DataTextbox.FontSize=12;
-% DataTextbox.FontName='FixedWidth' % To match data figure 2
-
-hold off
-% 
-% 
-% 
-
-FigName=[filename 'LengthTime.jpg'];
-% % % % saveas(gcf,FigName); %saves current figure (gcf) as a jpeg (extension specified in name)
-
-FigName=[filename 'LengthTime.eps'];
-% % % saveas(gcf,FigName); %saves current figure (gcf) as a eps for Adobe Illustrator (extension specified in name)
-
-
-
-FigArray(2)=figure;
-
-%---Depol Rate Versus Current Length Plot----------------------------
-
-%Setting x (the length the filament is shrinking FROM)
-x=-((0:ShrinkAmount-1)-StartingLength);
-
-%---Plotting each run
-for h=1:NumberofRuns
-    
-    y=[TimeAtLength(h,:)];
-    
-    p=plot(x,y);
-    
-    hold on
-end
-
-set(p, 'visible', 'off') %%%%%%%%%%%%%
-
-%---Plotting average of all runs
-
-%Setting yavg (the average of each run)
-avgStepTime=[mean(TimeAtLength)];
-
-pavg=plot(x,avgStepTime,'-dw');
-pavg.LineWidth=6;
-
-%---Setting figure properties
-
-set(gca, 'OuterPosition', [0.05,.27,1,.73]); % graph starts 0 away from left edge, 20% away from bottom edge, takes up 100% space from left-to-right, & 85% space up-to-down (100%-15%)
-set(gca, 'fontsize',14);
-
-set(gca, 'XLim',[min(x),max(x)]); %graph for some reason showing one blank data point at beginning (x=LengthofFilament), this fixes that (max(xavg)=LengthofFilament-1)
-
-set(gca, 'XDir','reverse'); %so x is shown shrinking instead of growing, must be under setting XLim
-
-
-%---Setting Titles
-title('Time Until Depolymerization At L=x to L=x-1');
-xlabel('Length (in Monomers) Filament Is Shrinking From');
-ylabel('Time Taken To Depolymerize');
-
-
-% %---Data Textbox
-% 
-% %Creates Labels
-% avgText=["Time Between Each Depol Event: "; "When Shrinking to L = "]; %Creates String Array for labels
-% avgText=pad(avgText); %Makes them both the same number of characters
-% 
-% %Creates string array of data points
-% for u=(1:ShrinkAmount)
-% stry=sprintf('%.2f',avgStepTime(u)); % displays only two decimals
-% strx=num2str(x(u));
-% avgData{1,u}=stry;
-% avgData{2,u}=strx;
-% end
-% 
-% 
-% avgData=pad(avgData); %Makes all data same number of characters (so they line up)
-% avgData=join(avgData); % Joins all data as two rows (so it can be but in array with labels)
-% 
-% %Combines labels and data points
-% avgVal=[avgText avgData];
-% avgVal=join(avgVal);
-% 
-% %Creates textbox
-% DataTextbox=annotation('textbox', [0.05, 0, 0.15, 0.15], 'String', [avgVal], 'FitBoxToText','on'); %text box horizontally offset (from left) 15% of figure's width & vertically offset (from bottom) 0%. Box fits around text. Default Height is 10% of height x 10% width
-% DataTextbox.FontSize=12;
-% DataTextbox.FontName='FixedWidth' % Font makes it so all data lines up
-
-%---Paremter Textbox
-ParTextbox=annotation('textbox', [0.65, 0.8, 0.1, 0.1], 'String', parameters, 'FitBoxToText','on'); %text box horizontally offset (from left) 70% of figure's width & vertically offset (from bottom) 80%. Box fits around text. Default Height is 10% of height x 10% width
-ParTextbox.FontSize=12;
-ParTextbox.FontName='FixedWidth'; % To match data figure 2
-ParTextbox.BackgroundColor=TextboxColor;
-ParTextbox.FaceAlpha=.7; %Transparency of textbox background
-
-%---FigDescription Textbox
-DesTextbox=annotation('textbox', [0.05, 0.15, 0.1, 0.1], 'String', figdescription, 'FitBoxToText','on'); %text box horizontally offset (from left) 70% of figure's width & vertically offset (from bottom) 80%. Box fits around text. Default Height is 10% of height x 10% width
-DesTextbox.FontSize=12;
-
-hold off
-
-FigName=[filename 'DepolTime.jpg'];
-% % % saveas(gcf,FigName); %saves current figure (gcf) as a jpeg (extension specified in name)
-
-FigName=[filename 'DepolTime.eps'];
-% % % saveas(gcf,FigName); %saves current figure (gcf) as a eps for Adobe Illustrator (extension specified in name)
-
-
-%Saving figures
-FigArrayName=[filename '.fig'];
-% % % savefig(FigArray,FigArrayName,'compact');
-
+%--------------------------------------------------------------------------
 
 w=w+1
 end
@@ -689,7 +507,11 @@ end
 
 
 
-%% ~~~~~~~~~~~~Figures (New)~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+
+%% ~~~~COLOR GRADIENTS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 reds=    [0.4941    0.0235    0.1725
         0.6627    0.2471    0.3281
@@ -712,8 +534,6 @@ purples=[ 0.3059    0.0118    0.6745
         0.7529    0.5582    0.8915
         0.9765    0.8314    1.0000];
 
-
-
 MasterColorGradient={oranges(size(lengths,2):-1:1,:) purples(size(lengths,2):-1:1,:) blues(size(lengths,2):-1:1,:) greens(size(lengths,2):-1:1,:)}; %pick colors based on how many proteins there are
 
 DesboxColor=[0.6902    1.0000    0.8275];
@@ -722,14 +542,13 @@ TextboxColor=[0.7843    0.8667    0.9686]
 
 
 
-%% ---Length V Time--------------------------------------------------------
+%% ~~~LENGTH VERSUS TIME PLOT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 FigArray(1)=figure;
 
 for l=1:size(lengths,2)
     
-
 for p=1:size(proteins,2)
     
     StartingLength=lengths(l)
@@ -743,6 +562,8 @@ for p=1:size(proteins,2)
     LVTplot=plot(x,y)
     LVTplot.DisplayName=['Starting Length = ' num2str(lengths(l)) ' | Proteins = ' num2str(proteins(p))];
     LVTplot.LineWidth=8;
+    ax=gca;
+    ax.LineWidth=6; %Linewidth of axises
 %     LVTplot.Color=proteincolors(i,:); % for changing protein concentration
     LVTplot.Color=color; %for changing starting lengths
     
@@ -752,65 +573,40 @@ end
 
 end
 
-
-for r=1:4
-    
-    
+%---Plotting Example Runs-----
+for r=1:4  
     x=[0 TimeAtLengthCum(r,:)]./60;
     y=(StartingLength-(0:ShrinkAmount))*MonomerMeasurement;  %times the length of 1 monomer
     LVTplotEx=plot(x,y)
     LVTplotEx.LineWidth=4;
     LVTplotEx.Color=[0.7 0.125 0.882];
-    
 end
 
 
- legend show
- legend('Location','southeastoutside')
+%  legend show
+%  legend('Location','southeastoutside')
  
 
 %---Setting Titles
 xlabel('Time (min)');
-ylabel('Length of Filament (microns)');
-title('Length Of Filament Over Time With 5 nM MCAK');
+ylabel('Length (microns)');
+title('Length Versus Time With 5 nM MCAK');
 
 %---Setting Figure Properties 
 
 % set(gca, 'Units', 'normalized');
 % set(gca, 'OuterPosition', [0,.27,1,.73]); %  graph starts 0 away from left edge, 20% away from bottom edge, takes up 100% space from left-to-right, & 85% space up-to-down (100%-15%)
 
-set(gca, 'TitleFontSizeMultiplier', .6); % Makes title size smaller so it doeant run off the page
+% set(gca, 'TitleFontSizeMultiplier', .6); % Makes title size smaller so it doeant run off the page
 set(gca, 'fontsize',30);
+set(gca, 'fontweight', 'bold');
 set(gca, 'YLim',[MinFilamentSize*MonomerMeasurement,max(y)]); %graph for some reason showing one blank data point at bottom, this fixes that (max(xavg)=LengthofFilament-1)
-
 
 %--Saving Vector Figure Before Textboxes
 set(gcf, 'Position', get(0, 'Screensize'))
 FigName=[filename 'LengthTime'];
 saveas(gcf,FigName, 'epsc2'); %saves current figure (gcf) as a eps (color) for Adobe Illustrator (extension specified in name)
-   
-
-% % % % %---Parameter Textbox
-% % % ParTextbox=annotation('textbox', [0.25, 0.35, 0.1, 0.2], 'String', parameters, 'FitBoxToText','off'); %text box horizontally offset (from left) 70% of figure's width & vertically offset (from bottom) 80%. Box fits around text. Default Height is 10% of height x 10% width
-% % % ParTextbox.FontSize=20;
-% % % % ParTextbox.FontName='FixedWidth'; % To match data figure 2
-% % % ParTextbox.BackgroundColor=TextboxColor;
-% % % ParTextbox.FaceAlpha=.5; %Transparency of textbox background
-% % % 
-% % % %---FigDescription Textbox
-% % % DesTextbox=annotation('textbox', [0.4, 0.75, 0.45, 0.15], 'String', figdescription, 'FitBoxToText','off'); %text box horizontally offset (from left) 70% of figure's width & vertically offset (from bottom) 80%. Box fits around text. Default Height is 10% of height x 10% width
-% % % DesTextbox.FontSize=20;
-% % % DesTextbox.BackgroundColor=DesboxColor;
-% % % DesTextbox.FaceAlpha=.5; %Transparency of textbox background
-% % % 
-% % % % Zoom 1
-% % %     % set(gca, 'XLim',[0,10]);
-% % %     % ParTextbox=annotation('textbox', [0.5, 0.51, 0.1, 0.1], 'String', parameters, 'FitBoxToText','on'); %text box horizontally offset (from left) 70% of figure's width & vertically offset (from bottom) 80%. Box fits around text. Default Height is 10% of height x 10% width
-% % % 
-% % % 
-% % %     set(gcf, 'Position', get(0, 'Screensize'))
-    
-    
+          
 FigName=[filename 'LengthTime.jpg'];
 saveas(gcf,FigName); %saves current figure (gcf) as a jpeg (extension specified in name)
 
