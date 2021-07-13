@@ -9,7 +9,7 @@ close all
 mainfilename='Jenna_Unassisted'; %main file name (parameters added later)
 
 %-Lengths and Proteins To Run--------------------------------------------
-lengths=[625];
+lengths=[1050];
 proteins=[5]; % 5nM
 
 %-Rates------------------------------------------------------------------
@@ -21,7 +21,7 @@ kUnassisted=.0417; %monomers/sec % Chance filament will depolymerize without a p
 
 %-Other Parameters-------------------------------------------------------
 NumberofRuns=1000;
-MinFilamentSize=375; %How small the filament will shrink to 
+MinFilamentSize=975; %How small the filament will shrink to 
 BoundEffect=0; %0 if free proteins constant, 1 if free proteins change
 DirectEndBinding=1; %if DirectEndBinding=1, proteins can only land on end, if =0, they can land anywhere on filament
 
@@ -594,9 +594,10 @@ y=(StartingLength-(0:ShrinkAmount))*MonomerMeasurement;
 y25 = y(1:25:end) %picks every 25th value (spaced out on graph)
 x=((StartingLength*MonomerMeasurement-y)./(kUnassisted*MonomerMeasurement*60));  %times the length of 1 monomer
 x25 = x(1:25:end) %picks every 25th value (spaced out on graph)
-Theoryplot=plot(x25,y25,'-*');
-Theoryplot.MarkerSize=20;
-Theoryplot.Color=[0.737 0.031 0.298];
+Theoryplot=plot(x25,y25,'*');
+Theoryplot.LineWidth=20; %Makes asterisk marks bigger
+Theoryplot.MarkerSize=30;
+Theoryplot.Color=reds(3,:); %same color as theory in the Depol graphs
 
 
  
@@ -623,7 +624,7 @@ lh=legend([LVTplot, LVTplotEx, Theoryplot], 'Simulation Average', 'Sample Simula
 FigName=[filename 'LengthTime'];
 saveas(gcf,FigName, 'epsc2'); %saves current figure (gcf) as a eps (color) for Adobe Illustrator (extension specified in name)
           
-FigName=[filename 'LengthTime.jpg'];
-saveas(gcf,FigName); %saves current figure (gcf) as a jpeg (extension specified in name)
+FigName=[filename 'LengthTime.png'];
+saveas(gcf,FigName); %saves current figure (gcf) as a png (extension specified in name)
 
 % hold off
