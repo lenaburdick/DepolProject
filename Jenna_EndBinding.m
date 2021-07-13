@@ -3,13 +3,18 @@ close all
 
 % April 15 2021
 
+%Updated July 13 2021
+
+%This Simulation finds the length over time of a continuosly depolymerizing
+%filament where only end-binding is possible
+
 %This code was copy and pasted from Jenna_Unassisted.m
 
 %-File Name--------------------------------------------------------------
 mainfilename='Jenna_EndBinding_LVT'; %main file name (parameters added later)
 
 %-Lengths and Proteins To Run--------------------------------------------
-lengths=[625];
+lengths=[1050];
 proteins=[5]; % 5nM
 
 %-Rates------------------------------------------------------------------
@@ -21,7 +26,7 @@ kUnassisted=0; %monomers/sec % Chance filament will depolymerize without a prote
 
 %-Other Parameters-------------------------------------------------------
 NumberofRuns=1000;
-MinFilamentSize=375; %How small the filament will shrink to 
+MinFilamentSize=975; %How small the filament will shrink to 
 BoundEffect=0; %0 if free proteins constant, 1 if free proteins change
 DirectEndBinding=1; %if DirectEndBinding=1, proteins can only land on end, if =0, they can land anywhere on filament
 
@@ -554,6 +559,7 @@ for r=1:6
     LVTplotEx=plot(x,y);
     LVTplotEx.LineWidth=2;
     LVTplotEx.Color=[.62 .455 .765];
+    LVTplotEx.DisplayName='Sample Runs';
     
     hold on
 end
@@ -574,7 +580,7 @@ for p=1:size(proteins,2)
     color=color(l,:);
     
     LVTplot=plot(x,y)
-    LVTplot.DisplayName=['Starting Length = ' num2str(lengths(l)) ' | Proteins = ' num2str(proteins(p))];
+    LVTplot.DisplayName='Simulation Average';
     LVTplot.LineWidth=8;
     ax=gca;
     ax.LineWidth=6; %Linewidth of axises
@@ -593,19 +599,19 @@ y=(StartingLength-(0:ShrinkAmount))*MonomerMeasurement;  %times the length of 1 
 y25 = y(1:25:end) %picks every 25th value (spaced out on graph)
 x=((StartingLength*MonomerMeasurement-y)./(MonomerMeasurement*60*((kLand*proteins*kAssist)/(kAssist+kLand*proteins))));
 x25 = x(1:25:end) %picks every 25th value (spaced out on graph)
-Theoryplot=plot(x25,y25,'-*');
-Theoryplot.MarkerSize=20;
-Theoryplot.LineWidth=2;
-Theoryplot.Color=[0.737 0.031 0.298];
-% Theoryplot.MarkerFaceColor=[0.141 1 0.973];
-% Theoryplot.MarkerEdgeColor=[0 0 0]; 
+Theoryplot=plot(x25,y25,'*');
+Theoryplot.MarkerSize=30;
+Theoryplot.LineWidth=20;
+Theoryplot.Color=reds(3,:);
+Theoryplot.DisplayName='Theory';
 
- 
+legend show
+
 
 %---Setting Titles
 xlabel('Time (min)');
 ylabel('Length (\mum)');
-title('Length Versus Time With 5 nM MCAK');
+title('Length Versus Time With 5 nm MCAK');
 
 %---Setting Figure Properties 
 
@@ -619,11 +625,11 @@ set(gca, 'YLim',[MinFilamentSize*MonomerMeasurement,max(y)]); %graph for some re
 
 %--Saving Vector Figure Before Textboxes
 set(gcf, 'Position', get(0, 'Screensize'))
-lh=legend([LVTplot, LVTplotEx, Theoryplot], 'Simulation Average', 'Sample Simulation Runs', 'Theory');
+lh=legend([LVTplot, LVTplotEx, Theoryplot], 'Simulation Average', 'Sample Runs', 'Theory');
 FigName=[filename 'LengthTime'];
 saveas(gcf,FigName, 'epsc2'); %saves current figure (gcf) as a eps (color) for Adobe Illustrator (extension specified in name)
           
-FigName=[filename 'LengthTime.jpg'];
+FigName=[filename 'LengthTime.png'];
 saveas(gcf,FigName); %saves current figure (gcf) as a jpeg (extension specified in name)
 
 % hold off
