@@ -2,9 +2,17 @@ clear all
 close all
 
 % Created June 30 2021
-    % This code was copy and pasted from Liz_Diffusion_LVT_ADAE.m
-
+    % This code was copy and pasted from Liz_Diffusion_LVT_ADAE.m   
+    
+    
 %% ---CODE DESCRIPTION-------------------------------------------------------
+
+%This set of parameters is taken from the Helenius MCAK paper and converted
+% to larger scale (1 idealized monomer = 3 microtubule rings). The figure
+% is for length versus time in seconds and depol versus length in seconds
+
+% PB time is NOT added to figures (should you do this?)
+
 
 % In this simulation, multiple proteins can land and walk on the filament.
 % Once any protein reaches the end, the filament must depolymerize
@@ -19,16 +27,18 @@ close all
 
 % The filament can only depolymerize from one end
 
+%% ---FILE NAME------------------------------------------------------------
 
 %-File Name--------------------------------------------------------------
 mainfilename='MultiProteinDiffusion_PB_ADAE'; %main file name 
     % (all data and figure files will be named with some variation of this name)
 
 %-Save Preferences------------------------------------------------------
-savefigures=0; % set to 1 if you want to save .fig, .espc, and .jpeg files, set to zero if not
+savefigures=1; % set to 1 if you want to save .fig, .espc, and .png files, set to zero if not
 savedata=0; % set to 1 if you want to save .mat files, set to zero if not
     % WARNING: .mat of this simulation are sometimes too big to save, in
     % which case you'll get an error message but the cide will still run
+savetextdata=1;
 
 %% ---PARAMETERS-----------------------------------------------------------    
 
@@ -36,7 +46,7 @@ savedata=0; % set to 1 if you want to save .mat files, set to zero if not
 % In this version of the simulation, "lengths" and "proteins" are single
 % values, but in other versions, they are arrays of multiple values 
 
-lengths=[250]; % Number of monomers (the length in um is found by multiplying this by MonomerMeasurement)
+lengths=[263]; % Number of monomers (the length in um is found by multiplying this by MonomerMeasurement) %% Taken from MCAK LVT graph
 proteins=[5]; % Protein concentration
 
 %-Rates------------------------------------------------------------------
@@ -47,12 +57,13 @@ kFall=0; % Chance of a single protein falling off (not at end)
 kUnassisted=0; %monomers/sec % Chance filament will depolymerize without a protein at the end
 
 %-Other Parameters-------------------------------------------------------
-NumberofRuns=25; % How many times the simulation runs
-MinFilamentSize=200; %How small 9in terms of monomers) the filament will shrink to
+NumberofRuns=50; % How many times the simulation runs
+MinFilamentSize=245; %How small 9in terms of monomers) the filament will shrink to  %% Taken from MCAK LVT graph
 PBTime=10; %How many seconds the simulation "has been running"/ binding proteins before starting
 BoundEffect=0; %0 if free proteins constant, 1 if free proteins change.
     % This will generally always be 0.
 DirectEndBinding=0; %if DirectEndBinding=1, proteins can only land on end, if =0, they can land anywhere on filament
+ExampleRuns=6; % How many sample trajectories in the Length versus Time graph
 
 %---Measurements-------------------------------
 MonomerMeasurement=.032; %This is the length of the idealized monomer in um
@@ -78,7 +89,7 @@ for w=1:size(proteins,2)
     % protein concentrations, which you generally aren't in this version.
     
 %% --- Initializing Variables at Start of Each Run    
-clearvars -except l w lengths proteins kLand kAssist kWalk kFall kUnassisted NumberofRuns MinFilamentSize BoundEffect DirectEndBinding mainfilename OccupancyCell ProteinTrackingCell OutcomeCell avgCumTimeCell MonomerMeasurement PBTime savedata savefigures %%% add the tracking cells to this too
+clearvars -except l w lengths proteins kLand kAssist kWalk kFall kUnassisted NumberofRuns MinFilamentSize BoundEffect DirectEndBinding mainfilename OccupancyCell ProteinTrackingCell OutcomeCell avgCumTimeCell MonomerMeasurement PBTime savedata savefigures ExampleRuns %%% add the tracking cells to this too
     % Clears variables before each run. There is definitely a less sloppy
     % way to do this.
 
@@ -645,19 +656,20 @@ FigArray(1)=figure;
     % still the average of ALL runs, not just the number chosen by
     % ExampleRuns
     
-ExampleRuns=6;
-for r=1:ExampleRuns  
-    x=[0 TimeAtLengthCum(r,:)]./60;
-    y=(StartingLength-(0:ShrinkAmount))*MonomerMeasurement;  %times the length of 1 monomer
+for r=1:ExampleRuns
+    
+    x=[0 TimeAtLengthCum(r,:)]; % in seconds
+    y=(StartingLength-(0:ShrinkAmount))*MonomerMeasurement;  %   times the length of 1 monomer
     LVTplotEx=plot(x,y);
     LVTplotEx.LineWidth=2;
     LVTplotEx.Color=[.62 .455 .765];
     
     hold on
+
 end
-
-hold on
-
+    
+    hold on
+    
 %---PLOTTING AVERAGE OF ALL RUNS-------------------------------------------
 
 for l=1:size(lengths,2)
@@ -666,7 +678,7 @@ for p=1:size(proteins,2)
     
     StartingLength=lengths(l)
     
-    x=avgCumTimeCell{l,p}./60;
+    x=avgCumTimeCell{l,p}; % in seconds
     y=(StartingLength-(0:ShrinkAmount))*MonomerMeasurement;  %times the length of 1 monomer
     
     color=MasterColorGradient{p};
@@ -687,8 +699,9 @@ end
 end
 
 
+
 %---Setting Titles
-xlabel('Time (min)');
+xlabel('Time (sec)');
 ylabel('Length (\mum)');
 title('Length Versus Time With 5 nM MCAK');
 
@@ -709,7 +722,7 @@ lh=legend([LVTplot, LVTplotEx], 'Simulation Average', 'Sample Simulation Runs');
 %---.fig Format------------------------------------------------------------
 FigName=[filename 'LengthTime'];
 if savefigures==1 
-saveas(gcf,FigName, '.fig'); %saves current figure (gcf) as a .fig (MATLAB format) (extension specified in name)
+saveas(gcf,FigName, 'fig'); %saves current figure (gcf) as a .fig (MATLAB format) (extension specified in name)
 end
 
 %---Vector Format----------------------------------------------------------
@@ -720,8 +733,222 @@ end
 
 %---JPEG Format------------------------------------------------------------
 if savefigures==1
-FigName=[filename 'LengthTime.jpg'];
-saveas(gcf,FigName); %saves current figure (gcf) as a jpeg (extension specified in name)
+FigName=[filename 'LengthTime'];
+saveas(gcf,FigName, 'png'); %saves current figure (gcf) as a jpeg (extension specified in name)
 end
 
-% hold off
+
+ hold off
+
+
+
+%% ~~~DEPOL RATE VERSUS LENGTH PLOT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+FigArray(2)=figure;
+
+   
+for l=1:size(lengths,2)
+    
+    
+for p=1:size(proteins,2)
+   
+    StartingLength=lengths(l);
+    
+%     y=avgStepTime; %This is in seconds
+    y=MonomerMeasurement./diff(avgCumTimeCell{l,p}); % THis uses the diff function on the LVT plot instead of the avgStepTimeMatrix
+    x=(StartingLength-(0:ShrinkAmount-1))*MonomerMeasurement;  %times the length of 1 monomer; % one less since trying to show x-> (x-1) not (x+1)-> x
+    
+    %---Line of Best Fit-------------------------------------------------------
+    % Done before the averages plot so that the dots are on top 
+    P = polyfit(x,y,1);
+    yfit = P(1)*x+P(2);
+
+    hold on
+
+    bf=plot(x,yfit);
+    bf.LineWidth=8;
+    bf.Color=reds(3,:);
+    bf.DisplayName='Linear Fit'
+    %--------------------------------------------------------------------------
+    
+    DEPOLplot=plot(x,y, 'o')
+    DEPOLplot.DisplayName='Simulation Data';
+    DEPOLplot.MarkerSize=20;
+    DEPOLplot.LineWidth=4; % The size of the marker edge
+    DEPOLplot.MarkerFaceColor=greens(3,:);
+    DEPOLplot.MarkerEdgeColor=greens(2,:);
+ 
+    
+    hold on
+    hold on
+    
+end
+end
+
+
+legend show
+
+%---Setting Titles
+xlabel('Length (\mum)');
+ylabel('Depolymerization Rate (\mum / sec)');
+title('Instantaneous Depolymerization Rate');
+
+%---Setting Figure Properties 
+
+set(gca, 'fontsize',30);
+set(gca, 'fontweight', 'bold');
+ax=gca;
+ax.LineWidth=6; %Linewidth of axises
+
+% set(gca, 'TitleFontSizeMultiplier', .6); % Makes title size smaller so it doeant run off the page
+set(gca, 'XLim',[min(x),max(x)]); %for some reason there was extra space on both sides of x axis
+set(gca, 'YLim', [0, max(y)*2]); % puts extra space above and below y 
+
+set(gca, 'XDir','reverse'); %so x is shown shrinking instead of growing, must be under setting XLim
+
+%--Saving Vector Figure Before Textboxes
+set(gcf, 'Position', get(0, 'Screensize'))
+FigName=[filename 'DepolRate'];
+saveas(gcf,FigName, 'epsc2'); %saves current figure (gcf) as a eps (color) for Adobe Illustrator (extension specified in name)
+
+
+
+set(gcf, 'Position', get(0, 'Screensize'))
+
+%---.fig Format------------------------------------------------------------
+FigName=[filename 'DepolLength'];
+if savefigures==1 
+saveas(gcf,FigName, 'fig'); %saves current figure (gcf) as a .fig (MATLAB format) (extension specified in name)
+end
+
+%---Vector Format----------------------------------------------------------
+FigName=[filename 'DepolLength'];
+if savefigures==1 
+saveas(gcf,FigName, 'epsc2'); %saves current figure (gcf) as a eps (color) for Adobe Illustrator (extension specified in name)
+end
+
+%---JPEG Format------------------------------------------------------------
+if savefigures==1
+FigName=[filename 'DepolLength'];
+saveas(gcf,FigName, 'png'); %saves current figure (gcf) as a jpeg (extension specified in name)
+end
+
+hold off
+
+%% ~~~DEPOL RATE VERSUS TIME PLOT~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+FigArray(3)=figure;
+
+   
+for l=1:size(lengths,2)
+    
+    
+for p=1:size(proteins,2)
+   
+    StartingLength=lengths(l);
+    
+    y=MonomerMeasurement./diff(avgCumTimeCell{l,p}); %depolymerization rate in mon/sec
+    x=avgCumTimeCell{l,p}; % cumulative time of simulation
+    x=x(1:end-1); %removes final time so vectors are same length
+    
+    %---Line of Best Fit-------------------------------------------------------
+    % Done before the averages plot so that the dots are on top 
+    P = polyfit(x,y,1);
+    yfit = P(1)*x+P(2);
+
+    hold on
+
+    bf=plot(x,yfit);
+    bf.LineWidth=8;
+    bf.Color=reds(3,:);
+    bf.DisplayName='Linear Fit'
+    %--------------------------------------------------------------------------
+    
+    DEPOLplot=plot(x,y, 'o')
+    DEPOLplot.DisplayName='Simulation Data';
+    DEPOLplot.MarkerSize=20;
+    DEPOLplot.LineWidth=4; % The size of the marker edge
+    DEPOLplot.MarkerFaceColor=greens(3,:);
+    DEPOLplot.MarkerEdgeColor=greens(2,:);
+    
+    hold on
+    hold on
+    
+end
+end
+
+
+legend show
+
+%---Setting Titles
+xlabel('Time (sec)');
+ylabel('Depolymerization Rate (\mum / sec)');
+title('Instantaneous Depolymerization Rate');
+
+%---Setting Figure Properties 
+
+set(gca, 'fontsize',30);
+set(gca, 'fontweight', 'bold');
+ax=gca;
+ax.LineWidth=6; %Linewidth of axises
+
+% set(gca, 'TitleFontSizeMultiplier', .6); % Makes title size smaller so it doeant run off the page
+set(gca, 'XLim',[min(x),max(x)]); %for some reason there was extra space on one side of x axis
+set(gca, 'YLim', [0, max(y)*2]); % puts extra space above and below y 
+
+%--Saving Vector Figure Before Textboxes
+set(gcf, 'Position', get(0, 'Screensize'))
+FigName=[filename 'DepolRate'];
+saveas(gcf,FigName, 'epsc2'); %saves current figure (gcf) as a eps (color) for Adobe Illustrator (extension specified in name)
+
+
+
+set(gcf, 'Position', get(0, 'Screensize'))
+
+%---.fig Format------------------------------------------------------------
+FigName=[filename 'DepolTime'];
+if savefigures==1 
+saveas(gcf,FigName, 'fig'); %saves current figure (gcf) as a .fig (MATLAB format) (extension specified in name)
+end
+
+%---Vector Format----------------------------------------------------------
+FigName=[filename 'DepolTime'];
+if savefigures==1 
+saveas(gcf,FigName, 'epsc2'); %saves current figure (gcf) as a eps (color) for Adobe Illustrator (extension specified in name)
+end
+
+%---JPEG Format------------------------------------------------------------
+if savefigures==1
+FigName=[filename 'DepolTime'];
+saveas(gcf,FigName, 'png'); %saves current figure (gcf) as a jpeg (extension specified in name)
+end 
+
+
+%% ---Saving text Data-----------------------------------------------------
+if savetextdata=1
+
+Parameters=[lengths proteins kLand kAssist kWalk kFall kUnassisted NumberofRuns MinFilamentSize PBTime BoundEffect DirectEndBinding MonomerMeasurement ShrinkAmount];
+ParameterSize=size(Parameters,2);
+
+Data=avgCumTimeCell{1,1}; %This is because there is only one length and one concentration in this code
+DataSize=size(avgCumTimeCell{1,1},2);
+
+SampleData=[]; %These are the example runs in the lengths versus time graph
+SampleDataSize=ShrinkAmount+1;
+for r=1:ExampleRuns
+    
+    sample=[0 TimeAtLengthCum(r,:)];
+    SampleData=[SampleData sample];
+end
+
+DataToTrack=[ParameterSize, DataSize, SampleDataSize, Parameters, Data, SampleData];
+fileID3 = fopen(mainfilename,'w'); % The 'w' means overwrite existing data in the file. 'a' would be for append.
+fprintf(fileID3,'%12.8f %12.8f %12.8f %12.8f %12.8f %12.8f\r\n',DataToTrack'); %Don't quite know how the %12.8f thing works
+fclose(fileID3);
+end
+
+
+
+
