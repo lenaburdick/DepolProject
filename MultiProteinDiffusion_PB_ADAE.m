@@ -756,7 +756,7 @@ for p=1:size(proteins,2)
     StartingLength=lengths(l);
     
 %     y=avgStepTime; %This is in seconds
-    y=MonomerMeasurement./diff(avgCumTimeCell{l,p}); % THis uses the diff function on the LVT plot instead of the avgStepTimeMatrix
+    y=MonomerMeasurement./diff(avgCumTimeCell{l,p})*60; %*60=um/min % THis uses the diff function on the LVT plot instead of the avgStepTimeMatrix
     x=(StartingLength-(0:ShrinkAmount-1))*MonomerMeasurement;  %times the length of 1 monomer; % one less since trying to show x-> (x-1) not (x+1)-> x
     
     %---Line of Best Fit-------------------------------------------------------
@@ -791,7 +791,7 @@ legend show
 
 %---Setting Titles
 xlabel('Length (\mum)');
-ylabel('Depolymerization Rate (\mum / sec)');
+ylabel('Depolymerization Rate (\mum / min)');
 title('Instantaneous Depolymerization Rate');
 
 %---Setting Figure Properties 
@@ -849,7 +849,7 @@ for p=1:size(proteins,2)
    
     StartingLength=lengths(l);
     
-    y=MonomerMeasurement./diff(avgCumTimeCell{l,p}); %depolymerization rate in mon/sec
+    y=MonomerMeasurement./diff(avgCumTimeCell{l,p})*60; %*60= um/min %depolymerization rate in mon/sec
     x=avgCumTimeCell{l,p}; % cumulative time of simulation
     x=x(1:end-1); %removes final time so vectors are same length
     
@@ -884,7 +884,7 @@ legend show
 
 %---Setting Titles
 xlabel('Time (sec)');
-ylabel('Depolymerization Rate (\mum / sec)');
+ylabel('Depolymerization Rate (\mum / min)');
 title('Instantaneous Depolymerization Rate');
 
 %---Setting Figure Properties 
