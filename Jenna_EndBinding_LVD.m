@@ -590,7 +590,7 @@ hold on
 %---Setting Titles
 xlabel('Length (\mum)');
 ylabel('Depol Rate (\mum/min)');
-title('Depol Rate Versus Length With 5 nm MCAK');
+title('End Binding');
 
 %---Setting Figure Properties 
 

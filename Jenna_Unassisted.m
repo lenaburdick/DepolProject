@@ -605,7 +605,7 @@ Theoryplot.Color=reds(3,:); %same color as theory in the Depol graphs
 %---Setting Titles
 xlabel('Time (min)');
 ylabel('Length (\mum)');
-title('Length Versus Time With 5 nM MCAK');
+title('Unassisted Depolymerization');
 
 %---Setting Figure Properties 
 

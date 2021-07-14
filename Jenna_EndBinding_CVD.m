@@ -7,6 +7,14 @@ close all
 
 %Graphs concentration versus depolymerization rate
 
+%This simulation measures the average instantaneous depolymerization rate
+%as a filament shrinks by one monomer at 8 different concentrations
+
+%Rates are based on Helenius paper
+
+%Updated July 13 2021
+
+
 %-File Name--------------------------------------------------------------
 mainfilename='Jenna_EndBinding_CVD'; %main file name (parameters added later)
 
@@ -14,24 +22,24 @@ mainfilename='Jenna_EndBinding_CVD'; %main file name (parameters added later)
 saverun=1; %Saves the data if =1, doesn't if =0
 
 %-Lengths and Proteins To Run--------------------------------------------
-lengths=[625];
-proteins=[ 5 100 200 500 1000 2500 5000]; % 5nM
+lengths=[1000];
+proteins=[5 125 250 500 1000 2500 5000 10000]; % 5nM
 
 %-Rates------------------------------------------------------------------
-kLand=.016; % /sec %Chance of a single motor falling on filament. true kOn is kOn*NumberofFreeMotors*LengthofFilament
-kAssist=13.33; % /sec
+kLand=0.00512;; % /sec %Chance of a single motor falling on filament. true kOn is kOn*NumberofFreeMotors*LengthofFilament
+kAssist=4.17; % /sec
 kWalk=0; %Chance of a single motor walking on filament. true kWalk is kWalk*NumberofBoundMotors
 kFall=0; % Chance of a single protein falling off (not at end)
 kUnassisted=0; %monomers/sec % Chance filament will depolymerize without a protein at the end
 
 %-Other Parameters-------------------------------------------------------
 NumberofRuns=10000;
-MinFilamentSize=[624]; %How small the filament will shrink to 
+MinFilamentSize=[999]; %How small the filament will shrink to 
 BoundEffect=0; %0 if free proteins constant, 1 if free proteins change
 DirectEndBinding=1; %if DirectEndBinding=1, proteins can only land on end, if =0, they can land anywhere on filament
 
 %---Measurements-------------------------------
-MonomerMeasurement=0.005; %This is the length of monomer in um
+MonomerMeasurement=0.008; %This is the length of monomer in um
 
 
 %---Cells------------------------------------------------------------------
@@ -517,33 +525,33 @@ end
 
 
 
-% %% ~~~~COLOR GRADIENTS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-% 
-% reds=    [0.4941    0.0235    0.1725
-%         0.6627    0.2471    0.3281
-%         0.8314    0.4706    0.4837
-%         1.0000    0.6941    0.6392];
-% oranges=[0.8706    0.3608    0.0196
-%         0.9046    0.5739    0.2105
-%         0.9386    0.7869    0.4013
-%         0.9725    1.0000    0.5922];
-%  greens=[0.3059    0.7294    0.1020
-%         0.4340    0.8196    0.3438
-%         0.5621    0.9098    0.5856
-%         0.6902    1.0000    0.8275];
-%  blues=[0.0196    0.7216    0.9686
-%         0.2745    0.7699    0.9686
-%         0.5294    0.8183    0.9686
-%         0.7843    0.8667    0.9686];
-% purples=[ 0.3059    0.0118    0.6745
-%         0.5294    0.2850    0.7830
-%         0.7529    0.5582    0.8915
-%         0.9765    0.8314    1.0000];
-% 
-% MasterColorGradient={oranges(size(lengths,2):-1:1,:) purples(size(lengths,2):-1:1,:) blues(size(lengths,2):-1:1,:) greens(size(lengths,2):-1:1,:)}; %pick colors based on how many proteins there are
-% 
-% DesboxColor=[0.6902    1.0000    0.8275];
-% TextboxColor=[0.7843    0.8667    0.9686]
+%% ~~~~COLOR GRADIENTS~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+reds=    [0.4941    0.0235    0.1725
+        0.6627    0.2471    0.3281
+        0.8314    0.4706    0.4837
+        1.0000    0.6941    0.6392];
+oranges=[0.8706    0.3608    0.0196
+        0.9046    0.5739    0.2105
+        0.9386    0.7869    0.4013
+        0.9725    1.0000    0.5922];
+ greens=[0.3059    0.7294    0.1020
+        0.4340    0.8196    0.3438
+        0.5621    0.9098    0.5856
+        0.6902    1.0000    0.8275];
+ blues=[0.0196    0.7216    0.9686
+        0.2745    0.7699    0.9686
+        0.5294    0.8183    0.9686
+        0.7843    0.8667    0.9686];
+purples=[ 0.3059    0.0118    0.6745
+        0.5294    0.2850    0.7830
+        0.7529    0.5582    0.8915
+        0.9765    0.8314    1.0000];
+
+MasterColorGradient={oranges(size(lengths,2):-1:1,:) purples(size(lengths,2):-1:1,:) blues(size(lengths,2):-1:1,:) greens(size(lengths,2):-1:1,:)}; %pick colors based on how many proteins there are
+
+DesboxColor=[0.6902    1.0000    0.8275];
+TextboxColor=[0.7843    0.8667    0.9686]
 
 
 
@@ -558,7 +566,7 @@ x=proteins;
 y=MonomerMeasurement*60*((kLand.*x*kAssist)./(kAssist+kLand.*x));
 Theoryplot=plot(x,y);
 Theoryplot.LineWidth=8;
-Theoryplot.Color=[0.737 0.031 0.298];
+Theoryplot.Color=reds(3,:);
 Theoryplot.DisplayName='Theory';
 
 hold on  
@@ -566,16 +574,13 @@ hold on
     x=proteins;
     y=avgDepolRateMatrix*60*MonomerMeasurement; 
     
-%     color=MasterColorGradient{p};
-%     color=color(l,:);
     
-    Depolplot=plot(x,y,'o')
-    Depolplot.LineWidth=8;
-    Depolplot.MarkerSize=20;
-    Depolplot.MarkerFaceColor=[.62 .455 .765];
-    Depolplot.MarkerEdgeColor=[.62 .455 .765];
-    Depolplot.DisplayName='Simulation Average';
-    
+    DEPOLplot=plot(x,y, 'o')
+    DEPOLplot.DisplayName='Simulation Average';
+    DEPOLplot.MarkerSize=20;
+    DEPOLplot.LineWidth=4; % The size of the marker edge
+    DEPOLplot.MarkerFaceColor=greens(3,:);
+    DEPOLplot.MarkerEdgeColor=greens(2,:);
     
     ax=gca;
     ax.LineWidth=6; %Linewidth of axises
@@ -619,9 +624,11 @@ legend show
  
 
 %---Setting Titles
-xlabel('Concentration (nM)');
+xlabel('Concentration (nm)');
 ylabel('Depol Rate (\mum/min)');
-title('Depol Rate Versus Concentration');
+TrueLength=lengths*MonomerMeasurement;
+str="End Binding (at Filament Length " + TrueLength + '\mum)';
+title(str);
 
 %---Setting Figure Properties 
 
@@ -641,8 +648,8 @@ if saverun==1
 FigName=[filename 'LengthTime'];
 saveas(gcf,FigName, 'epsc2'); %saves current figure (gcf) as a eps (color) for Adobe Illustrator (extension specified in name)
           
-FigName=[filename 'LengthTime.jpg'];
-saveas(gcf,FigName); %saves current figure (gcf) as a jpeg (extension specified in name)
+FigName=[filename 'LengthTime.png'];
+saveas(gcf,FigName); %saves current figure (gcf) as a png (extension specified in name)
 end
 
 % hold off

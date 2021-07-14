@@ -611,7 +611,7 @@ legend show
 %---Setting Titles
 xlabel('Time (min)');
 ylabel('Length (\mum)');
-title('Length Versus Time With 5 nm MCAK');
+title('End Binding');
 
 %---Setting Figure Properties 
 
