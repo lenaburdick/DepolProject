@@ -57,9 +57,9 @@ kFall=0; % Chance of a single protein falling off (not at end)
 kUnassisted=0; %monomers/sec % Chance filament will depolymerize without a protein at the end
 
 %-Other Parameters-------------------------------------------------------
-NumberofRuns=50; % How many times the simulation runs
-MinFilamentSize=245; %How small 9in terms of monomers) the filament will shrink to  %% Taken from MCAK LVT graph
-PBTime=10; %How many seconds the simulation "has been running"/ binding proteins before starting
+NumberofRuns=10; % How many times the simulation runs
+MinFilamentSize=245; %How small (in terms of monomers) the filament will shrink to  %% Taken from MCAK LVT graph
+PBTime=0; %=75/(kLand*proteins*lengths); %Want it to always =75 for all concentrations %How many seconds the simulation "has been running"/ binding proteins before starting
 BoundEffect=0; %0 if free proteins constant, 1 if free proteins change.
     % This will generally always be 0.
 DirectEndBinding=0; %if DirectEndBinding=1, proteins can only land on end, if =0, they can land anywhere on filament
@@ -89,7 +89,7 @@ for w=1:size(proteins,2)
     % protein concentrations, which you generally aren't in this version.
     
 %% --- Initializing Variables at Start of Each Run    
-clearvars -except l w lengths proteins kLand kAssist kWalk kFall kUnassisted NumberofRuns MinFilamentSize BoundEffect DirectEndBinding mainfilename OccupancyCell ProteinTrackingCell OutcomeCell avgCumTimeCell MonomerMeasurement PBTime savedata savefigures ExampleRuns %%% add the tracking cells to this too
+clearvars -except l w lengths proteins kLand kAssist kWalk kFall kUnassisted NumberofRuns MinFilamentSize BoundEffect DirectEndBinding mainfilename OccupancyCell ProteinTrackingCell OutcomeCell avgCumTimeCell MonomerMeasurement PBTime savedata savefigures ExampleRuns savetextdata %%% add the tracking cells to this too
     % Clears variables before each run. There is definitely a less sloppy
     % way to do this.
 
@@ -106,7 +106,7 @@ PreBound=ceil(kLand*proteins(w)*StartingLength*PBTime); % rounding so that it is
 parameters=join({'Initial Length=' num2str(StartingLength);'Total Proteins=' num2str(TotalProteins); 'Runs=' num2str(NumberofRuns); 'kOn=' num2str(kLand); 'kAssist=' num2str(kAssist); 'kWalk=' num2str(kWalk); 'kFall=' num2str(kFall); 'kDepol=' num2str(kUnassisted)});
 
 %---Setting File Name------------------------------------------------------
-filename=[mainfilename '_1s_'  num2str(DirectEndBinding) 'b_' num2str(kUnassisted) 'kD_' num2str(kFall) 'kF_'  num2str(BoundEffect) 'c_' num2str(kWalk) 'kW_' num2str(kAssist) 'kA_' num2str(kLand) 'kO_' num2str(NumberofRuns) 'r_L' num2str(StartingLength) '_P' num2str(TotalProteins)]; 
+filename=[mainfilename '_1s_'  num2str(DirectEndBinding) 'b_' num2str(kUnassisted) 'kD_' num2str(kFall) 'kF_'  num2str(BoundEffect) 'c_' num2str(kWalk) 'kW_' num2str(kAssist) 'kA_' num2str(kLand) 'kO_' num2str(NumberofRuns) 'r_L' num2str(StartingLength) '_P' num2str(TotalProteins) '_PB' num2str(PreBound)]; 
 filename=strrep(filename,'.','-'); %Replaces '.' in variables with '-' so it can be read
 
 %---Colors-----------------------------------------------------------------
@@ -231,6 +231,7 @@ OccupancyMatrix(1,:)=OccupancyArray;
         %(Each run through loop is one depol event)
         
 while DepolEvents<ShrinkAmount
+    
     
 %---Counting While Loop-----   
 j=j+1;
@@ -365,6 +366,8 @@ OutcomeArray=zeros(1,12); % resets the outcome array to 0
             %---DECREASING LENGTH-----
             CurrentLength=CurrentLength-1;
             NumberofMonomers=NumberofMonomers-1;
+            
+            CurrentLength % For Tracking Purposes
             
             
 %---WALK (k3)-----
@@ -703,7 +706,7 @@ end
 %---Setting Titles
 xlabel('Time (sec)');
 ylabel('Length (\mum)');
-title('Length Versus Time With 5 nM MCAK');
+title('Multiple Protein Diffusion');
 
 %---Setting Figure Properties 
 
@@ -792,7 +795,7 @@ legend show
 %---Setting Titles
 xlabel('Length (\mum)');
 ylabel('Depolymerization Rate (\mum / min)');
-title('Instantaneous Depolymerization Rate');
+title('Multiple Protein Diffusion');
 
 %---Setting Figure Properties 
 
@@ -885,7 +888,7 @@ legend show
 %---Setting Titles
 xlabel('Time (sec)');
 ylabel('Depolymerization Rate (\mum / min)');
-title('Instantaneous Depolymerization Rate');
+title('Multiple Protein Diffusion');
 
 %---Setting Figure Properties 
 
@@ -927,7 +930,7 @@ end
 
 
 %% ---Saving text Data-----------------------------------------------------
-if savetextdata=1
+if savetextdata==1
 
 Parameters=[lengths proteins kLand kAssist kWalk kFall kUnassisted NumberofRuns MinFilamentSize PBTime BoundEffect DirectEndBinding MonomerMeasurement ShrinkAmount];
 ParameterSize=size(Parameters,2);
@@ -944,7 +947,8 @@ for r=1:ExampleRuns
 end
 
 DataToTrack=[ParameterSize, DataSize, SampleDataSize, Parameters, Data, SampleData];
-fileID3 = fopen(mainfilename,'w'); % The 'w' means overwrite existing data in the file. 'a' would be for append.
+textfile=[filename '.txt'];
+fileID3 = fopen(textfile,'w'); % The 'w' means overwrite existing data in the file. 'a' would be for append.
 fprintf(fileID3,'%12.8f %12.8f %12.8f %12.8f %12.8f %12.8f\r\n',DataToTrack'); %Don't quite know how the %12.8f thing works
 fclose(fileID3);
 end
