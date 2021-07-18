@@ -46,19 +46,19 @@ savetextdata=1;
 % In this version of the simulation, "lengths" and "proteins" are single
 % values, but in other versions, they are arrays of multiple values 
 
-lengths=[263]; % Number of monomers (the length in um is found by multiplying this by MonomerMeasurement) %% Taken from MCAK LVT graph
-proteins=[5]; % Protein concentration
+lengths=[131]; % Number of monomers (the length in um is found by multiplying this by MonomerMeasurement) %% Taken from MCAK LVT graph
+proteins=[.5]; % Protein concentration
 
 %-Rates------------------------------------------------------------------
-kLand=.02048; % /sec %Chance of a single motor falling on filament. true kOn is kOn*NumberofFreeMotors*LengthofFilament
-kAssist=1.042; % /sec
-kWalk=742.12; %Chance of a single motor walking on filament. true kWalk is kWalk*NumberofBoundMotors
+kLand=.041; % /sec %Chance of a single motor falling on filament. true kOn is kOn*NumberofFreeMotors*LengthofFilament
+kAssist=.523; % /sec
+kWalk=185.55; %Chance of a single motor walking on filament. true kWalk is kWalk*NumberofBoundMotors
 kFall=0; % Chance of a single protein falling off (not at end)
 kUnassisted=0; %monomers/sec % Chance filament will depolymerize without a protein at the end
 
 %-Other Parameters-------------------------------------------------------
 NumberofRuns=10; % How many times the simulation runs
-MinFilamentSize=245; %How small (in terms of monomers) the filament will shrink to  %% Taken from MCAK LVT graph
+MinFilamentSize=84; %How small (in terms of monomers) the filament will shrink to  %% Taken from MCAK LVT graph
 PBTime=0; %=75/(kLand*proteins*lengths); %Want it to always =75 for all concentrations %How many seconds the simulation "has been running"/ binding proteins before starting
 BoundEffect=0; %0 if free proteins constant, 1 if free proteins change.
     % This will generally always be 0.
@@ -66,7 +66,7 @@ DirectEndBinding=0; %if DirectEndBinding=1, proteins can only land on end, if =0
 ExampleRuns=6; % How many sample trajectories in the Length versus Time graph
 
 %---Measurements-------------------------------
-MonomerMeasurement=.032; %This is the length of the idealized monomer in um
+MonomerMeasurement=.064; %This is the length of the idealized monomer in um
 
 
 %% ---SIMULATION-----------------------------------------------------------
@@ -554,7 +554,7 @@ end
 
 %~~~END OF ALL RUNS FOR LENGTH/PROTEIN~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-avgCumTime=[0 mean(TimeAtLengthCum)]; %avg cumulative time of the sim after each depol event
+avgCumTime=[0 mean(TimeAtLengthCum,1)]; %avg cumulative time of the sim after each depol event
 avgStepTime=[1./mean(TimeAtLength)]; %avg depol rate at each depol event
 avgCumTimeCell{l,w}=avgCumTime;
 
