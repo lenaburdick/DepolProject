@@ -46,9 +46,8 @@ savetextdata=1;
 % In this version of the simulation, "lengths" and "proteins" are single
 % values, but in other versions, they are arrays of multiple values 
 
-lengths=[131]; % Number of monomers (the length in um is found by multiplying this by MonomerMeasurement) %% Taken from MCAK LVT graph
-proteins=[.5]; % Protein concentration
-
+lengths=[131]; % Number of monomers (the length in um is found by multiplying this by MonomerMeasurement) %% Taken from MCAK L0]; % Protein concentration
+proteins=[80];
 %-Rates------------------------------------------------------------------
 kLand=.041; % /sec %Chance of a single motor falling on filament. true kOn is kOn*NumberofFreeMotors*LengthofFilament
 kAssist=.523; % /sec
@@ -58,7 +57,7 @@ kUnassisted=0; %monomers/sec % Chance filament will depolymerize without a prote
 
 %-Other Parameters-------------------------------------------------------
 NumberofRuns=10; % How many times the simulation runs
-MinFilamentSize=84; %How small (in terms of monomers) the filament will shrink to  %% Taken from MCAK LVT graph
+MinFilamentSize=110; %How small (in terms of monomers) the filament will shrink to  %% Taken from MCAK LVT graph
 PBTime=0; %=75/(kLand*proteins*lengths); %Want it to always =75 for all concentrations %How many seconds the simulation "has been running"/ binding proteins before starting
 BoundEffect=0; %0 if free proteins constant, 1 if free proteins change.
     % This will generally always be 0.
@@ -248,7 +247,11 @@ OutcomeArray=zeros(1,12); % resets the outcome array to 0
     if DirectEndBinding==1 && sum(ProteinTrackingMatrix(:,6)==NumberofMonomers)==0 %cannot happen if protein is at end
         k1=kLand*FreeProteins(j)*1;
     else
-        k1=kLand*FreeProteins(j)*CurrentLength; %kOn times number of free motors times length of filament
+        if sum(ProteinTrackingMatrix(:,6)==NumberofMonomers)==0
+            k1=kLand*FreeProteins(j)*CurrentLength; %kOn times number of free motors times length of filament
+        else
+            k1=0  % updated 7/21. If error, look here.
+        end
     end
  %-- k2 (kAssist)    
     if sum(ProteinTrackingMatrix(:,6)==NumberofMonomers)>0
