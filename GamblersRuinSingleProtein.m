@@ -2,12 +2,17 @@
 clear all
 close all
 
-StartingLength=66; % Number of monomers (the length in um is found by multiplying this by MonomerMeasurement) %% Taken from MCAK L0]; % Protein concentration
-Proteins=.125;
+
+% Changed simulation so that is had to pick which direction to go every
+% time it walked. We will see if there is a different result. called files
+% for this test GamblersRuinSingleProtein2
+
+StartingLength=10; % Number of monomers (the length in um is found by multiplying this by MonomerMeasurement) %% Taken from MCAK L0]; % Protein concentration
+Proteins=1;
 %-Rates------------------------------------------------------------------
-kLand=.082; % /sec %Chance of a single motor falling on filament. true kOn is kOn*NumberofFreeMotors*LengthofFilament
-kAssist=.26; % /sec
-kWalk=46.39; %Chance of a single motor walking on filament. true kWalk is kWalk*NumberofBoundMotors
+kLand=1; % /sec %Chance of a single motor falling on filament. true kOn is kOn*NumberofFreeMotors*LengthofFilament
+kAssist=1; % /sec
+kWalk=1; %Chance of a single motor walking on filament. true kWalk is kWalk*NumberofBoundMotors
 kFall=0; % Chance of a single protein falling off (not at end)
 kUnassisted=0; %monomers/sec % Chance filament will depolymerize without a protein at the end
 
@@ -18,7 +23,20 @@ MinFilamentSize=2; %How small (in terms of monomers) the filament will shrink to
 ExampleRuns=5;
 
 %---Measurements-------------------------------
-MonomerMeasurement=.128; %This is the length of the idealized monomer in um
+MonomerMeasurement=1; %This is the length of the idealized monomer in um
+
+
+
+savefigures=1;
+
+%-File Name--------------------------------------------------------------
+mainfilename='GamblersRuinSingleProtein2'; %main file name 
+    % (all data and figure files will be named with some variation of this name)
+    
+%---Setting File Name------------------------------------------------------
+filename=[mainfilename '_2s_0b_' num2str(kUnassisted) 'kD_' num2str(kFall) 'kF_0c_' num2str(kWalk) 'kW_' num2str(kAssist) 'kA_' num2str(kLand) 'kO_' num2str(NumberofRuns) 'r_L' num2str(StartingLength) '_P' num2str(Proteins) '_MS' num2str(MonomerMeasurement)]; 
+filename=strrep(filename,'.','-'); %Replaces '.' in variables with '-' so it can be read
+
 
 
 
@@ -82,7 +100,7 @@ for h=1:NumberofRuns
     
     if p<k1/kTotal % LAND
         
-%         Outcome=1;
+        Outcome=1;
         
         LandPosition=ceil(p/(k1/kTotal)*NumberofMonomers);
         
@@ -97,7 +115,7 @@ for h=1:NumberofRuns
         
         if p>k1/kTotal && p<(k1+k2)/kTotal % ASSIST
                 
-%             Outcome=2;
+            Outcome=2;
             
             NumberofMonomers=NumberofMonomers-1;
             CurrentLength=CurrentLength-1;
@@ -115,13 +133,11 @@ for h=1:NumberofRuns
             
         else % WALK
          
-%             Outcome=3;
+            Outcome=3;
             
-            TimeToEitherEnd=LandPosition*(NumberofMonomers-LandPosition); % THis is the expected time to reasch an end based on land position, per the Gambler's Ruin paper
-            DT(j)= TimeToEitherEnd;
+%             TimeToEitherEnd=LandPosition*(NumberofMonomers-LandPosition); % THis is the expected time to reasch an end based on land position, per the Gambler's Ruin paper
+%             DT(j)= TimeToEitherEnd;
             
-            IsProteinBound=1;
-            IsProteinOnEnd=1;
           
 % This section calculates probabiity of the protein reaching either end,
 % then gives the time it takes to get to that end. In Gambler's Ruin paper,
@@ -129,23 +145,26 @@ for h=1:NumberofRuns
 % I will use until I get further clarification
 
 
-%             ProbLeft=(CurrentLength-LandPosition)/CurrentLength; %Probability protein will reach left end
-%             ProbRight=LandPosition/CurrentLength; %Probability protein will reach right end
-%             %%% FILL IN WHEN IPAD WORKS TimeLeft=
-%             %%% FILL IN WHEN IPAD WORKS TimeRight= 
-%             
-%             
-%             q=p-(k1+k2)/kTotal; %This is how far p is away from the edge of the "walk bin." In this simulation, it should = p
-%             
-%             if q<ProbLeft
-%                 WhichEnd=0; % Protein goes to left end
-%                 DT(j)=TimeLeft; % Average time a protein in this position takes to reach left end
-%             else
-%                 WhichEnd=1; % Protein goes to right end
-%                 DT(j)=TimeRight; % Average time a protein in this position takes to reach right end
-%             end
-%             
-%             %%%% Check this whole section
+            ProbLeft=(CurrentLength-LandPosition)/CurrentLength; %Probability protein will reach left end
+            ProbRight=LandPosition/CurrentLength; %Probability protein will reach right end
+            TimeLeft=LandPosition*(2*CurrentLength-LandPosition)/3;
+            TimeRight=(CurrentLength^2-LandPosition^2)/3;
+            
+            
+            q=p-(k1+k2)/kTotal; %This is how far p is away from the edge of the "walk bin." In this simulation, it should = p
+            
+            if q<ProbLeft
+                WhichEnd=0; % Protein goes to left end
+                DT(j)=TimeLeft; % Average time a protein in this position takes to reach left end
+            else
+                WhichEnd=1; % Protein goes to right end
+                DT(j)=TimeRight; % Average time a protein in this position takes to reach right end
+            end
+            
+            %%%% Check this whole section
+            
+            IsProteinBound=1;
+            IsProteinOnEnd=1;
             
       
             
@@ -157,6 +176,7 @@ for h=1:NumberofRuns
     
     
 % % FOR CHECKING---------------------
+%      Outcome=Outcome
 %      DT(j)=DT(j)
 %      TotalTime=TotalTime
 %      Length=Length
@@ -269,24 +289,24 @@ set(gca, 'fontweight', 'bold');
 % %---SAVING FIGURE----------------------------------------------------------
  set(gcf, 'Position', get(0, 'Screensize'))
 % lh=legend([LVTplot, LVTplotEx], 'Simulation Average', 'Sample Simulation Runs');
-% 
-% %---.fig Format------------------------------------------------------------
-% FigName=[filename 'LengthTime'];
-% if savefigures==1 
-% saveas(gcf,FigName, 'fig'); %saves current figure (gcf) as a .fig (MATLAB format) (extension specified in name)
-% end
-% 
-% %---Vector Format----------------------------------------------------------
-% FigName=[filename 'LengthTime'];
-% if savefigures==1 
-% saveas(gcf,FigName, 'epsc2'); %saves current figure (gcf) as a eps (color) for Adobe Illustrator (extension specified in name)
-% end
-% 
-% %---JPEG Format------------------------------------------------------------
-% if savefigures==1
-% FigName=[filename 'LengthTime'];
-% saveas(gcf,FigName, 'png'); %saves current figure (gcf) as a jpeg (extension specified in name)
-% end
+
+%---.fig Format------------------------------------------------------------
+FigName=[filename 'LengthTime'];
+if savefigures==1 
+saveas(gcf,FigName, 'fig'); %saves current figure (gcf) as a .fig (MATLAB format) (extension specified in name)
+end
+
+%---Vector Format----------------------------------------------------------
+FigName=[filename 'LengthTime'];
+if savefigures==1 
+saveas(gcf,FigName, 'epsc2'); %saves current figure (gcf) as a eps (color) for Adobe Illustrator (extension specified in name)
+end
+
+%---JPEG Format------------------------------------------------------------
+if savefigures==1
+FigName=[filename 'LengthTime'];
+saveas(gcf,FigName, 'png'); %saves current figure (gcf) as a jpeg (extension specified in name)
+end
 
 
  hold off
